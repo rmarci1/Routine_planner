@@ -1,13 +1,12 @@
-import { View, Text } from 'react-native'
 import React from 'react'
-import { SafeAreaView } from 'react-native-safe-area-context'
+import {SplashScreen, Stack } from 'expo-router'
 
-const _layout = () => {
+const Rootlayout = () => {
   return (
-    <SafeAreaView>
-      <Text className='text-3xl'>_layout</Text>
-    </SafeAreaView>
+    <Stack>
+        <Stack.Screen name='index' options={{headerShown: false}} />
+    </Stack>
   )
 }
 
-export default _layout
+export default Rootlayout
