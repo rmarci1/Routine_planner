@@ -12,7 +12,7 @@ const FormField = ({title,value,handleChangeText,otherStyles,placeholder}) => {
       <Text className='text-white text-2xl font-pmedium pl-2 pb-3'>{title}</Text>
       <View className='border-2 border-blue-400 w-full h-16 px-4 bg-black-100 rounded-3xl focus:border-x-lime-400 items-center flex-row pt-4'>
         <TextInput
-          className='text-white font-psemibold text-lg flex-1 ml-2 pb-2'
+          className='text-white font-psemibold text-lg flex-1 pb-3'
           value={value}
           placeholder={placeholder}
           placeholderTextColor="#7b7b8b"

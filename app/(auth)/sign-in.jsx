@@ -1,19 +1,21 @@
-import { View, Text, ScrollView, Image, Alert } from 'react-native'
+import { View, Text, ScrollView, Alert} from 'react-native'
 import React, { useState } from 'react'
 import "../../global.css"
 import { SafeAreaView } from 'react-native-safe-area-context'
-import icons from '@/constants/icons'
 import FormField from '@/components/FormField'
 import CustomButton from '@/components/CustomButton'
 import { Link, router } from 'expo-router'
-import { signIn } from '@/lib/appwrite'
+import { getCurrentUser, signIn, updateUser } from '@/lib/appwrite'
+import CheckBox, { Checkbox } from 'expo-checkbox'
+import { useGlobalContext } from '@/context/GlobalProvider'
 const Signin = () => {
+  const {user,setUser, setIsLoggedIn} = useGlobalContext()
   const [form, setForm] = useState({
     email : '',
     password: ''
   })
   const [isSubmitting, setisSubmitting] = useState(false);
-  const [toggleCheckBox, setToggleCheckBox] = useState(false)
+  const [isChecked, setIsChecked] = useState(false)
 
   const submit = async () => {
     if(!form.email || !form.password){
@@ -21,8 +23,16 @@ const Signin = () => {
     }
     setisSubmitting(true);
     try {   
-      const result = await signIn(form.email, form.password);
+      await signIn(form.email, form.password);
+
+      const result = getCurrentUser();
+      setUser(result);
+      setIsLoggedIn(true);
+      console.log(user)
+      await updateUser(user,isChecked)
+      Alert.alert("Success", "User signed in successfully");
       router.replace('/(tabs)/home');
+
     }
     catch(error)
     {
@@ -57,11 +67,19 @@ const Signin = () => {
             placeholder="Enter your password..."
             otherStyles = "mt-7"
           />
+          <View className='flex-row pt-8 pl-2'>
+            <Checkbox
+            value={isChecked}
+            onValueChange={setIsChecked}
+            />
+            <Text className='text-white text-lg font-pregular ml-2'>Remember me</Text>
+          </View>
           <CustomButton
             title = "Sign In"
             handlePress={submit}
-            containerStyles="mt-7"           
+            containerStyles="mt-7"                   
           />
+          
           <View className='justify-center pt-5 flex-row gap-2'>
               <Text className='text-center text-lg text-white font-pregular'>Don't have an account?</Text>
               <Link href='/sign-up' className='text-blue-400 font-psemibold text-lg'>Sign up</Link>

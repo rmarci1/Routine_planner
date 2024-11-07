@@ -8,8 +8,10 @@ import CustomButton from '@/components/CustomButton'
 import { Link, router } from 'expo-router'
 import zxcvbn from 'zxcvbn';
 import {createUser} from '@/lib/appwrite'
+import { useGlobalContext } from '@/context/GlobalProvider'
 
 const Signup = () => {
+  const {setUser, setIsLoggedIn} = useGlobalContext()
   const [form, setForm] = useState({
     username: '',
     email : '',
@@ -44,7 +46,10 @@ const Signup = () => {
 
       try {
         const result = await createUser(form.email, form.password, form.username);
-        router.replace('/(tabs)/home');
+        setUser(result);
+        setIsLoggedIn(true);
+
+        router.replace('/sign-in');
       }
       catch (error){
         Alert.alert('Error', error.message);

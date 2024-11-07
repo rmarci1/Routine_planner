@@ -4,7 +4,8 @@ import { SafeAreaView } from 'react-native-safe-area-context'
 import "../global.css"
 import CustomButton from '@/components/CustomButton'
 import images from '@/constants/images'
-import { router } from 'expo-router'
+import { Redirect, router } from 'expo-router'
+import { useGlobalContext } from '@/context/GlobalProvider'
 const advantage = [
   { id:'1', title: "- A well formed structure that will help you achieve your goals"},
   { id:'2', title: "- The addition of making it a game so maintining your habits becomes easier "},
@@ -12,6 +13,10 @@ const advantage = [
   { id:'4', title: "- Simple design to make it user friendly"}
 ]
 const index = () => {
+  const {isLoading, isLoggedIn} = useGlobalContext();
+
+  if(!isLoading && isLoggedIn) return <Redirect href="/home" />
+
   return (
     <SafeAreaView className='bg-primary h-full'>
       <View className='flex-1'>
