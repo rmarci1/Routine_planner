@@ -7,6 +7,7 @@ import FormField from '@/components/FormField'
 import CustomButton from '@/components/CustomButton'
 import { Link, router } from 'expo-router'
 import { signIn } from '@/lib/appwrite'
+import CheckBox from '@react-native-community/checkbox';
 const Signin = () => {
   const [form, setForm] = useState({
     email : '',
@@ -57,6 +58,11 @@ const Signin = () => {
             placeholder="Enter your password..."
             otherStyles = "mt-7"
           />
+           <CheckBox
+            value={isChecked}
+            onValueChange={setIsChecked}
+            tintColors={{ true: '#4CAF50', false: '#444' }}
+            />
           <CustomButton
             title = "Sign In"
             handlePress={submit}
