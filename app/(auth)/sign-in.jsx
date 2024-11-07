@@ -5,9 +5,7 @@ import { SafeAreaView } from 'react-native-safe-area-context'
 import FormField from '@/components/FormField'
 import CustomButton from '@/components/CustomButton'
 import { Link, router } from 'expo-router'
-import { getCurrentUser, signIn, updateUser } from '@/lib/appwrite'
-import CheckBox, { Checkbox } from 'expo-checkbox'
-import { useGlobalContext } from '@/context/GlobalProvider'
+import { signIn } from '@/lib/appwrite'
 const Signin = () => {
   const {user,setUser, setIsLoggedIn} = useGlobalContext()
   const [form, setForm] = useState({
@@ -67,13 +65,6 @@ const Signin = () => {
             placeholder="Enter your password..."
             otherStyles = "mt-7"
           />
-          <View className='flex-row pt-8 pl-2'>
-            <Checkbox
-            value={isChecked}
-            onValueChange={setIsChecked}
-            />
-            <Text className='text-white text-lg font-pregular ml-2'>Remember me</Text>
-          </View>
           <CustomButton
             title = "Sign In"
             handlePress={submit}
