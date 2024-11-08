@@ -5,7 +5,9 @@ import { SafeAreaView } from 'react-native-safe-area-context'
 import FormField from '@/components/FormField'
 import CustomButton from '@/components/CustomButton'
 import { Link, router } from 'expo-router'
-import { signIn } from '@/lib/appwrite'
+import { signIn,getCurrentUser,updateUser } from '@/lib/appwrite'
+import { useGlobalContext } from '@/context/GlobalProvider'
+import CheckBox from 'expo-checkbox'
 const Signin = () => {
   const {user,setUser, setIsLoggedIn} = useGlobalContext()
   const [form, setForm] = useState({
@@ -18,6 +20,7 @@ const Signin = () => {
   const submit = async () => {
     if(!form.email || !form.password){
       Alert.alert('Error', 'Please fill in all the fields')
+      return;
     }
     setisSubmitting(true);
     try {   
@@ -26,7 +29,6 @@ const Signin = () => {
       const result = getCurrentUser();
       setUser(result);
       setIsLoggedIn(true);
-      console.log(user)
       await updateUser(user,isChecked)
       Alert.alert("Success", "User signed in successfully");
       router.replace('/(tabs)/home');
@@ -65,12 +67,19 @@ const Signin = () => {
             placeholder="Enter your password..."
             otherStyles = "mt-7"
           />
+          <View className='flex-row pl-2 pt-7'>
+            <CheckBox
+              value = {isChecked}
+              onValueChange={setIsChecked}
+            />
+            <Text className='text-lg text-white font-pregular pl-2'>Remember me</Text>
+          </View>
           <CustomButton
             title = "Sign In"
             handlePress={submit}
             containerStyles="mt-7"                   
           />
-          
+
           <View className='justify-center pt-5 flex-row gap-2'>
               <Text className='text-center text-lg text-white font-pregular'>Don't have an account?</Text>
               <Link href='/sign-up' className='text-blue-400 font-psemibold text-lg'>Sign up</Link>
