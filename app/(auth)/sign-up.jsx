@@ -1,7 +1,6 @@
 import { View, Text, ScrollView, Alert, Animated,Easing } from 'react-native'
 import React, { useRef, useState } from 'react'
 import "../../global.css"
-import "./style.css"
 import { SafeAreaView } from 'react-native-safe-area-context'
 import FormField from '@/components/FormField'
 import CustomButton from '@/components/CustomButton'
@@ -87,6 +86,7 @@ const Signup = () => {
       }
       catch (error){
         Alert.alert('Error', error.message);
+        return;
       }
       finally{
         setisSubmitting(false);
@@ -122,10 +122,10 @@ const Signup = () => {
             })}
             otherStyles = "mt-7"
           />
-          <Text className={`mt-3 ml-2 font-psemibold ${getStrengthColor(strength)}`}>
+          <Text className={`mt-3 ml-2 font-psemibold text-xl ${getStrengthColor(strength)}`}>
               {strengthLabel[strength]}
           </Text>
-            <View className="h-2 w-full bg-gray-300 rounded overflow-hidden">
+            <View className="h-2 w-[98%] ml-2 bg-gray-300 rounded overflow-hidden">
             <Animated.View
                style={{
                   width: animatedValue.interpolate({
@@ -142,7 +142,7 @@ const Signup = () => {
             handleChangeText = {(e) => setForm({
               ...form, next_password: e
             })}
-            otherStyles = "mt-7"
+            otherStyles = "mt-4"
           />
           <CustomButton
             title = "Sign Up"

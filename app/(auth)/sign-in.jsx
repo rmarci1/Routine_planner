@@ -35,8 +35,9 @@ const Signin = () => {
 
     }
     catch(error)
-    {
+    { 
       Alert.alert('Error',error.message);
+      return;
     }
     finally{
       setisSubmitting(false);
