@@ -6,11 +6,11 @@ import FormField from '@/components/FormField'
 import CustomButton from '@/components/CustomButton'
 import { Link, router } from 'expo-router'
 import zxcvbn from 'zxcvbn';
-import {createUser} from '@/lib/appwrite'
+import {createProfile, createUser, SearchUser} from '@/lib/appwrite'
 import { useGlobalContext } from '@/context/GlobalProvider'
 
 const Signup = () => {
-  const {setUser, setIsLoggedIn} = useGlobalContext()
+  const {setUser, setIsLoggedIn, profile, setProfile} = useGlobalContext()
   const [form, setForm] = useState({
     username: '',
     email : '',
@@ -75,6 +75,11 @@ const Signup = () => {
         Alert.alert('Error', 'Your password needs to be Strong')
         return;
       }
+      const search = await SearchUser(form.username);
+      if (search.total != 0){
+          Alert.alert('Error','This username is already in use')
+          return;
+      }
       setisSubmitting(true);
 
       try {
@@ -82,6 +87,7 @@ const Signup = () => {
         setUser(result);
         setIsLoggedIn(true);
 
+        const createProfle = await createProfile(result,result.$id);          
         router.replace('/sign-in');
       }
       catch (error){
@@ -147,7 +153,8 @@ const Signup = () => {
           <CustomButton
             title = "Sign Up"
             handlePress={submit}
-            containerStyles="mt-7"           
+            containerStyles="mt-7"    
+            isLoading = {isSubmitting}
           />
 
           <View className='justify-center pt-5 flex-row gap-2'>

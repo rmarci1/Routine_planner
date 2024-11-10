@@ -1,8 +1,6 @@
 import { View, Text } from 'react-native'
 import React from 'react'
-import {Tabs,Redirect } from 'expo-router'
-import { StatusBar } from 'expo-status-bar'
-
+import {Tabs } from 'expo-router'
 import Feather from '@expo/vector-icons/Feather';
 import Entypo from '@expo/vector-icons/Entypo';
 import FontAwesome5 from '@expo/vector-icons/FontAwesome5';

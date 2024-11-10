@@ -1,4 +1,4 @@
-import { getCurrentUser } from "@/lib/appwrite";
+import { getCurrentProfile, getCurrentUser } from "@/lib/appwrite";
 import { createContext, useContext, useState, useEffect } from "react";
 
 const GlobalContext = createContext();
@@ -9,7 +9,7 @@ const GlobalProvider = ({children}) =>{
     const [isLoggedIn, setIsLoggedIn] = useState(false);    
     const [user, setUser] = useState(null);
     const [isLoading, setIsLoading] = useState(true);
-
+    const [profile, setProfile] = useState(null);
     useEffect(() => {
         getCurrentUser()
         .then((res) => {
@@ -32,7 +32,7 @@ const GlobalProvider = ({children}) =>{
             setIsLoading(false);
         })
     }, []);
-
+   
     return (
         <GlobalContext.Provider
             value = {{
@@ -40,7 +40,9 @@ const GlobalProvider = ({children}) =>{
                 setIsLoggedIn,
                 user,
                 setUser,
-                isLoading
+                isLoading,
+                profile,
+                setProfile
             }}
         >
             {children}

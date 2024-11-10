@@ -2,14 +2,14 @@ import { View, Text, ScrollView, Alert} from 'react-native'
 import React, { useState } from 'react'
 import "../../global.css"
 import { SafeAreaView } from 'react-native-safe-area-context'
+import { Link, router } from 'expo-router'
 import FormField from '@/components/FormField'
 import CustomButton from '@/components/CustomButton'
-import { Link, router } from 'expo-router'
+import CheckBox from 'expo-checkbox'
 import { signIn,getCurrentUser,updateUser } from '@/lib/appwrite'
 import { useGlobalContext } from '@/context/GlobalProvider'
-import CheckBox from 'expo-checkbox'
 const Signin = () => {
-  const {user,setUser, setIsLoggedIn} = useGlobalContext()
+  const {setUser, setIsLoggedIn} = useGlobalContext()
   const [form, setForm] = useState({
     email : '',
     password: ''
@@ -25,12 +25,11 @@ const Signin = () => {
     setisSubmitting(true);
     try {   
       await signIn(form.email, form.password);
-
-      const result = getCurrentUser();
+      const result = await getCurrentUser();
       setUser(result);
       setIsLoggedIn(true);
-      await updateUser(user,isChecked)
-      Alert.alert("Success", "User signed in successfully");
+      await updateUser(result,isChecked)
+
       router.replace('/(tabs)/home');
 
     }
@@ -78,7 +77,8 @@ const Signin = () => {
           <CustomButton
             title = "Sign In"
             handlePress={submit}
-            containerStyles="mt-7"                   
+            containerStyles="mt-7" 
+            isLoading={isSubmitting}                  
           />
 
           <View className='justify-center pt-5 flex-row gap-2'>
