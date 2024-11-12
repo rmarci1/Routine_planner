@@ -4,6 +4,7 @@ import {Tabs } from 'expo-router'
 import Feather from '@expo/vector-icons/Feather';
 import Entypo from '@expo/vector-icons/Entypo';
 import FontAwesome5 from '@expo/vector-icons/FontAwesome5';
+import { StatusBar } from 'expo-status-bar';
 const TabIcon = ({color,name,focused}) =>{
   return (
       <View className="items-center justify-center gap-2">
@@ -35,8 +36,8 @@ const TabIcon = ({color,name,focused}) =>{
   )
 }
 const _layout = () => {
-  return (
-    
+  return (  
+    <>
     <Tabs
     screenOptions={{
             tabBarShowLabel: false,
@@ -107,6 +108,8 @@ const _layout = () => {
       }}
     />
     </Tabs>
+    <StatusBar backgroundColor='#161622' style='light'></StatusBar>
+    </> 
   )
 }
 

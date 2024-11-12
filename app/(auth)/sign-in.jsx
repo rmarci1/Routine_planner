@@ -6,10 +6,10 @@ import { Link, router } from 'expo-router'
 import FormField from '@/components/FormField'
 import CustomButton from '@/components/CustomButton'
 import CheckBox from 'expo-checkbox'
-import { signIn,getCurrentUser,updateUser } from '@/lib/appwrite'
+import { signIn,getCurrentUser,updateUser, getCurrentProfile } from '@/lib/appwrite'
 import { useGlobalContext } from '@/context/GlobalProvider'
 const Signin = () => {
-  const {setUser, setIsLoggedIn} = useGlobalContext()
+  const {setUser, setIsLoggedIn,setProfile,setIsProfileIn} = useGlobalContext()
   const [form, setForm] = useState({
     email : '',
     password: ''
@@ -30,6 +30,10 @@ const Signin = () => {
       setIsLoggedIn(true);
       await updateUser(result,isChecked)
 
+      const profile = await getCurrentProfile();
+      
+      setProfile(profile);
+      setIsProfileIn(true);
       router.replace('/(tabs)/home');
 
     }

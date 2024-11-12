@@ -7,6 +7,7 @@ export const useGlobalContext = () => useContext(GlobalContext);
 
 const GlobalProvider = ({children}) =>{
     const [isLoggedIn, setIsLoggedIn] = useState(false);    
+    const [isProfileIn, setIsProfileIn] = useState(false);
     const [user, setUser] = useState(null);
     const [isLoading, setIsLoading] = useState(true);
     const [profile, setProfile] = useState(null);
@@ -32,7 +33,26 @@ const GlobalProvider = ({children}) =>{
             setIsLoading(false);
         })
     }, []);
-   
+    useEffect(() => {
+        getCurrentProfile()
+        .then((res) => {
+            setIsLoading(true);
+            if(res) {
+                setProfile(res);
+                setIsProfileIn(true);
+            }
+            else{
+                setProfile(null);
+                setIsProfileIn(false);
+            }
+        })
+        .catch((error) => {
+            console.log(error);
+        })
+        .finally(() => {
+            setIsLoading(false);
+        })
+    }, []);
     return (
         <GlobalContext.Provider
             value = {{
@@ -42,7 +62,9 @@ const GlobalProvider = ({children}) =>{
                 setUser,
                 isLoading,
                 profile,
-                setProfile
+                setProfile,
+                isProfileIn,
+                setIsProfileIn
             }}
         >
             {children}

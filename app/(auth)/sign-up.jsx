@@ -10,7 +10,7 @@ import {createProfile, createUser, SearchUser} from '@/lib/appwrite'
 import { useGlobalContext } from '@/context/GlobalProvider'
 
 const Signup = () => {
-  const {setUser, setIsLoggedIn, profile, setProfile} = useGlobalContext()
+  const {setUser, setIsLoggedIn, setProfile, setIsProfileIn} = useGlobalContext()
   const [form, setForm] = useState({
     username: '',
     email : '',
@@ -86,8 +86,9 @@ const Signup = () => {
         const result = await createUser(form.email, form.password, form.username);
         setUser(result);
         setIsLoggedIn(true);
-
-        const createProfle = await createProfile(result,result.$id);          
+        const createprofile = await createProfile(result, result.$id)       
+        setProfile(createprofile); 
+        setIsProfileIn(true);
         router.replace('/sign-in');
       }
       catch (error){
