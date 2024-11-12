@@ -1,4 +1,4 @@
-import { View, Text,FlatList} from 'react-native'
+import { View, Text,FlatList, Alert} from 'react-native'
 import React, { useState } from 'react'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { useGlobalContext } from '@/context/GlobalProvider'
@@ -7,6 +7,10 @@ import {Calendar} from 'react-native-calendars';
 import {LocaleConfig} from 'react-native-calendars';
 import Progressbar from '@/components/Progressbar';
 import { GestureHandlerRootView, Swipeable } from 'react-native-gesture-handler';
+
+import AntDesign from '@expo/vector-icons/AntDesign';
+import { updateTask } from '@/lib/appwrite';
+
 LocaleConfig.locales['fr'] = {
   monthNames: [
     'January',
@@ -27,29 +31,65 @@ LocaleConfig.locales['fr'] = {
   dayNamesShort: ['Su','Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa'],
 };
 LocaleConfig.defaultLocale = 'fr';
+
+
 const renderRightActions = () => {
   return (
-    <View className="w-[90%] h-12 bg-red-500 justify-center mx-auto">
-      <Text className="text-white">Delete</Text>
+    <View className="w-[90%] h-12 bg-red-400  justify-center mx-auto">
+      <Text className="text-white text-center">Deleting...</Text>
+      <AntDesign name="minuscircle" size={18} color="black" className="absolute right-1"/>
+    </View>
+  );
+};
+const renderLeftActions = () => {
+  return (
+    <View className="w-[90%] h-12 bg-lime-400 justify-center mx-auto">
+      <Text className="text-white text-center">Confirming...</Text>
+      <AntDesign name="pluscircle" size={18} color="black" className="absolute left-1"/>
     </View>
   );
 };
 
+const advantage = [
+  { id:'1', title: "- A well formed structure that will help you achieve your goals"},
+  { id:'2', title: "- The addition of making it a game so maintining your habits becomes easier "},
+  { id:'3', title: "- Large options to customize your experience"},
+  { id:'4', title: "- Simple design to make it user friendly"}
+]
+
 const home = () => {
   const {user,profile,setProfile} = useGlobalContext();
   const [selected, setSelected] = useState('');
+  const [swiped, setSwiped] = useState(false)
 
-  const tasks = ["Brush Teeth", "Cold shower", "Reading", "Programming"];
+  const handleSwipeLeft = (item) => {
+    setSwiped(true);
+    profile.tasks_left.pop(item);
+    console.log(profile.tasks_left);
+    //updateTask(profile);
+  };
+
   return (
     <SafeAreaView className='bg-primary h-full'>
       <FlatList
-          data = {tasks}
+          data = {profile.tasks_left}
           renderItem={({item}) => (
             <GestureHandlerRootView style={{ flex : 1}}>
-               <View className='flex-1'>
-                <Swipeable renderRightActions={renderRightActions}>
+               <View className=''>
+                <Swipeable 
+                  renderRightActions={swiped ? null : renderRightActions} 
+                  renderLeftActions={swiped ? null : renderLeftActions}
+                  onSwipeableWillOpen={(direction) => {               
+                      if(!swiped){
+                          if(direction === 'right'){handleSwipeLeft(item)}
+                      }
+                  }}
+                  onActivated={setSwiped(false)}
+                >
                   <View className="w-[90%] h-12 mx-auto bg-black-200 mb-5 justify-center">
-                    <Text className="text-center text-white">{item}</Text>
+                    <AntDesign name="doubleleft" size={18} color="red" className="absolute left-1"/>                
+                    <Text className="text-center text-white font-medium">{item}</Text>
+                    <AntDesign name="doubleright" size={18} color="lime" className="absolute right-1"/>
                   </View>
                 </Swipeable>
               </View>
@@ -90,14 +130,15 @@ const home = () => {
                   text = "HP"
                 />
                 <View className='flex-row space-x-2 justify-end mt-2'>
-                    <Text className='text-xl font-psemibold text-white text-right mr-2'>
+                    <FontAwesome5 name="gem" size={18} color="green" className="mr-1 mt-1" />
+                    <Text className='text-xl font-psemibold text-white text-right mr-4'>
                       {profile?.diamond}
                     </Text>
-                    <FontAwesome5 name="gem" size={20} color="green" className="mr-6" />
-                    <Text className='text-xl font-psemibold text-white text-right mr-2'>
+                    
+                    <FontAwesome5 name="coins" size={18} color="orange" className="mr-1 mt-1"/>  
+                    <Text className='text-xl font-psemibold text-white text-right'>
                       {profile?.coin}
-                    </Text>
-                    <FontAwesome5 name="coins" size={20} color="orange"/>           
+                    </Text>    
                   </View>
                 {/*<View className='mt-7'>
                   <Calendar
