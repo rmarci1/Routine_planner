@@ -45,9 +45,9 @@ const FormField = ({title,value,handleChangeText,otherStyles,placeholder}) => {
               <TouchableOpacity onPress={() => setShowPassword(!showPassword)}>
                   {
                     !showPassword ? (
-                       <Entypo name="eye-with-line" size={20}  color="white" className='w-6 h-6 mr-2 mb-3'/>
+                      <AntDesign name="eyeo" size={22} color="white" className='w-6 h-6 mr-2 mb-3'/>
                     ):(
-                      <AntDesign name="eye" size={20} color="white" className='w-6 h-6 mr-2 mb-3'/>
+                      <Entypo name="eye-with-line" size={20}  color="white" className='w-6 h-6 mr-2 mb-3'/>
                     )
                   }
               </TouchableOpacity>
