@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { FlatList, Text, View, TouchableOpacity, StyleSheet } from "react-native";
 import { GestureHandlerRootView, Swipeable } from "react-native-gesture-handler";
 import { AntDesign } from '@expo/vector-icons';
@@ -9,21 +9,47 @@ import { useGlobalContext } from "@/context/GlobalProvider";
 import FontAwesome5 from '@expo/vector-icons/FontAwesome5';
 import EmptyState from "@/components/EmptyState";
 import TextFade from "@/components/TextFade";
+import { updateStats } from "@/lib/appwrite";
 const SwipeableList = () => {
 
   const { user, profile, setProfile } = useGlobalContext();
 
   const [items, setItems] = useState(profile.tasks_left);
+  const [xp, setXp] = useState(profile.XP);
+  const [coin, setCoin] = useState(profile.coin);
   const [count,setCount] = useState(profile.tasks_left.length);
   const [fadeText, setFadeText] = useState(false);
-  const deleteItem = (item) => {
+  const [updateStatusBar, setUpdateStatusBar] = useState(false);
+
+  const [isSwiping, setIsSwiping] = useState(false);
+  const swipeableRefs = useRef(new Map());
+
+  const deleteItem = async (item,index,direction) => {
+    console.log(index);
     const updatedItems = items.filter((task) => task !== item);
     setItems(updatedItems);
-    setCount(count - 1);
-    setFadeText(true);
-    setTimeout(() => setFadeText(false), 1500)
+    onSwipeableOpen(index)
+    if(direction == "left"){
+      setCount(count - 1);
+      setXp(xp + 5)
+      setCoin(coin + 5);
+      await updateStats(profile,coin + 5, xp + 5);
+      setUpdateStatusBar(true);
+      setFadeText(true);
+
+      setTimeout(() => {setFadeText(false);setUpdateStatusBar(false);}, 1000)
+    } 
+    else{
+    }
+   
   };
 
+  const onSwipeableOpen = (index) => {
+    const swipeable = swipeableRefs.current.get(index);
+    if (swipeable) {
+      swipeable.close();
+    }
+  }
   const renderRightActions = (item) => {
     return (
       <View className="w-[90%] h-12 mx-auto bg-red-400 justify-center">
@@ -37,19 +63,39 @@ const SwipeableList = () => {
     </View>
     );
   };
+  const renderLeftActions = (item) => {
+    return (
+      <View className="w-[90%] h-12 bg-lime-400 justify-center mx-auto">
+        <Text className="text-white text-center">Completing...</Text>
+        <AntDesign name="pluscircle" size={18} color="black" className="absolute left-1"/>
+      </View>
+    );
 
-  // Render each item in the FlatList
-  const renderItem = ({ item }) => (
+  };
+  const handleSwipeableOpen = () => {
+    if (!isSwiping) {
+      setIsSwiping(true);
+    }
+  };
+  const handleSwipeableClose = (item) => {
+    setIsSwiping(false);
+    console.log(item);
+  };
+  const renderItem = ({ item,index }) => (
     <GestureHandlerRootView>
       <Swipeable
+        enabled = {!isSwiping}
+        ref={(ref) => swipeableRefs.current.set(index,ref)}
         renderRightActions={() => renderRightActions(item)}
-        onSwipeableWillClose={() => console.log(`Closed: ${item}`)}
-        onSwipeableOpen={() => deleteItem(item)}
+        renderLeftActions={() => renderLeftActions(item)}
+        onSwipeableClose={() => handleSwipeableClose(item)}
+        onSwipeableWillOpen={() => handleSwipeableOpen}
+        onSwipeableOpen={(direction) => deleteItem(item,index,direction)}
       > 
          <View className="w-[90%] h-12 mx-auto bg-black-200 mb-5 justify-center">
                <AntDesign name="doubleleft" size={18} color="red" className="absolute left-1"/>          
                <Text className="text-center text-white font-medium">{item}</Text>
-               <AntDesign name="doubleright" size={18} color="lime" className="absolute right-1"/>
+               <AntDesign name="doubleright" size={18} color="lime" className="absolute right-1"/>        
              </View>
       </Swipeable>
     </GestureHandlerRootView>
@@ -71,7 +117,7 @@ const SwipeableList = () => {
                   </Text>
                   <Text className='text-2xl font-psemibold text-white'>
                     {user?.username}
-                  </Text>
+                  </Text> 
                 </View>
                 {/*<View className='flex-row items-center space-x-2'>
                     <Text className='text-2xl font-psemibold text-white text-right mr-2'>
@@ -84,8 +130,9 @@ const SwipeableList = () => {
         <Progressbar
         title="Level"
         level={profile?.level}
-        current={profile?.XP}
-        max={profile?.level * 50}
+        current={xp}
+        change = {updateStatusBar}
+        max={profile?.level * 600}
         color="bg-blue-600"
         text="XP"
         styleContainer="mb-5"
@@ -104,21 +151,21 @@ const SwipeableList = () => {
 
                 <FontAwesome5 name="coins" size={18} color="orange" className="mr-1 mt-1" />
                 <Text className='text-xl font-psemibold text-white text-right'>
-                  {profile?.coin}
+                  {coin}
                 </Text>
               </View>
-              <View className='justify-center mt-4 flex-row items-center'>
-                  <Text className='text-white font-pregular text-xl'> {profile.tasks.length - count} </Text>
-                  <AntDesign name="check" size={24} color="green" />
+              <View className='justify-center mt-4 flex-row'>
                   <Text className='text-white font-pregular text-xl'> {count} </Text>
-                  <AntDesign name="close" size={24} color="red" />
+                  <AntDesign name="close" size={24} color="red" className="mr-4"/>
+                  <Text className='text-white font-pregular text-xl'> {profile.tasks.length - count} </Text>
+                  <AntDesign name="check" size={24} color="green"/>
               </View>
-              {fadeText && <TextFade/>}      
+              {fadeText && <TextFade/>}     
       </View>
       </View>
       }
       contentContainerStyle = {styles.listContent}
-        ListEmptyComponent={
+      ListEmptyComponent={
           <View>
             <EmptyState/>
           </View>

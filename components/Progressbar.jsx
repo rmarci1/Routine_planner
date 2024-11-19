@@ -2,19 +2,30 @@ import React, { useEffect, useRef, useMemo } from 'react';
 import { View, Text, Animated, Easing } from 'react-native';
 import { FontAwesome6, AntDesign } from '@expo/vector-icons';
 
-const Progressbar = ({ title, level, color, current, max, text, styleText, styleContainer }) => {
+const Progressbar = ({ title, level, color, current,change, max, text, styleText, styleContainer }) => {
   const animatedValue = useRef(new Animated.Value(0)).current;
+  const translateX = useRef(new Animated.Value(0)).current;
+  if(change){
+    useEffect(() => {
+      Animated.timing(animatedValue, {
+        toValue: current / max,
+        duration: 1000,
+        easing: Easing.ease,
+        useNativeDriver: false,
+      }).start();
+    }, [current, max, animatedValue]);
 
-  // Start animation whenever `current` or `max` changes
-  useEffect(() => {
-    Animated.timing(animatedValue, {
-      toValue: current / max,
-      duration: 1000,
-      easing: Easing.ease,
-      useNativeDriver: false,
-    }).start();
-  }, [current, max, animatedValue]);
-
+  }
+  else{
+    useEffect(() => {
+      Animated.timing(animatedValue, {
+        toValue: current / max,
+        duration: 1000,
+        easing: Easing.ease,
+        useNativeDriver: false,
+      }).start();
+    }, [current, max, animatedValue]);
+  }
   // Memoize the icon rendering logic
   const memoizedIcon = useMemo(() => {
     switch (text) {
@@ -42,14 +53,22 @@ const Progressbar = ({ title, level, color, current, max, text, styleText, style
       <View className="h-8 w-full bg-gray-400 rounded-full overflow-hidden justify-center">
         <Animated.View
           style={animatedStyle}
-          className={`h-full ${color} rounded`}
-        />
+          className={`h-full ${change ? "bg-cyan-300" : color} rounded justify-center`}
+        >
+        {
+          change && 
+          ( 
+            <AntDesign name="doubleright" size={20} color="lime" className='text-right mr-2' />
+          )
+        }
+        </Animated.View>
         <Text className="absolute left-1/2 -translate-x-1/2 text-white font-plight text-xl">
           {current} / {max} {memoizedIcon}
         </Text>
-        <Text className="absolute right-4 text-white font-pbold text-xl">
+        <Text className="absolute left-4 text-white font-pbold text-xl">
           {title} {level}
         </Text>
+       
       </View>
     </View>
   );
