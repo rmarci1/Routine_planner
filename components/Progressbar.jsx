@@ -3,8 +3,8 @@ import { View, Text, Animated, Easing } from 'react-native';
 import { FontAwesome6, AntDesign } from '@expo/vector-icons';
 
 const Progressbar = ({ title, level, color, current,change, max, text, styleText, styleContainer }) => {
+
   const animatedValue = useRef(new Animated.Value(0)).current;
-  const translateX = useRef(new Animated.Value(0)).current;
   if(change){
     useEffect(() => {
       Animated.timing(animatedValue, {

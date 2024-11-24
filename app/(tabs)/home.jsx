@@ -1,58 +1,109 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import { FlatList, Text, View, TouchableOpacity, StyleSheet } from "react-native";
 import { GestureHandlerRootView, Swipeable } from "react-native-gesture-handler";
-import { AntDesign } from '@expo/vector-icons';
 import { SafeAreaView } from "react-native-safe-area-context";
-import Progressbar from "@/components/Progressbar";
-import { useGlobalContext } from "@/context/GlobalProvider";
+import { LocaleConfig } from 'react-native-calendars';
+import moment from 'moment';
 
-import FontAwesome5 from '@expo/vector-icons/FontAwesome5';
+import { useGlobalContext } from "@/context/GlobalProvider";
+import { updateStats } from "@/lib/appwrite";
+import Progressbar from "@/components/Progressbar";
 import EmptyState from "@/components/EmptyState";
 import TextFade from "@/components/TextFade";
-import { updateStats } from "@/lib/appwrite";
+
+import Feather from '@expo/vector-icons/Feather';
+import FontAwesome5 from '@expo/vector-icons/FontAwesome5';
+import { AntDesign } from '@expo/vector-icons';
+
 const SwipeableList = () => {
 
   const { user, profile, setProfile } = useGlobalContext();
-
+  const [initialize, setInitialize] = useState(false);
   const [items, setItems] = useState(profile.tasks_left);
   const [xp, setXp] = useState(profile.XP);
+  const [update, setUpdate] = useState(0);
+  const [updateFull, setUpdateFull] = useState(0);
+  const [lastSwipe, setlastSwipe] = useState(false);
+
   const [coin, setCoin] = useState(profile.coin);
   const [count,setCount] = useState(profile.tasks_left.length);
   const [fadeText, setFadeText] = useState(false);
   const [updateStatusBar, setUpdateStatusBar] = useState(false);
 
+  const [started, setStarted] = useState(0)
+  const [max,setMax] = useState(0);
+
+  const [minusIndex, setMinusIndex] = useState(0);
   const [isSwiping, setIsSwiping] = useState(false);
+
   const swipeableRefs = useRef(new Map());
+  /*const [currentWeek, setCurrentWeek] = useState(moment());*/
+
+  const [gestureStarted, setGestureStarted] = useState(false);
+  useEffect(() => {
+    if(started == 0 && initialize){
+      setMax(0);
+      setMinusIndex(0);
+      setUpdateFull(update + 5);    
+      setUpdateStatusBar(true);
+      setFadeText(true)   
+    }
+  }, [started])
+  useEffect(() => {
+    if(initialize){
+      updateStats(profile, coin + updateFull, xp + updateFull);
+      setXp(xp + updateFull);
+      setCoin(coin + updateFull);
+      setTimeout(() => {setFadeText(false);setUpdateStatusBar(false);setUpdateFull(0)}, 1000)
+      setUpdate(0); 
+    }
+    setInitialize(true);
+  }, [updateFull])
+
+  /*const getWeekDays = () => {
+    const startOfWeek = currentWeek.clone().startOf('week');
+    const weekDays = [];
+    for (let i = 0; i < 7; i++) {
+      weekDays.push(startOfWeek.clone().add(i, 'days'));
+    }
+    return weekDays;
+  };
+
+  const changeWeek = (direction) => {
+    setCurrentWeek((prev) => prev.clone().add(direction === 'next' ? 7 : -7, 'days'));
+  };*/
 
   const deleteItem = async (item,index,direction) => {
-    console.log(index);
-    const updatedItems = items.filter((task) => task !== item);
+    setMax(Math.max(max,index-minusIndex));
+    let updatedItems = null;
+    if(index > max && max != 0){
+      setMinusIndex(minusIndex - 1);
+      updatedItems = items.filter((task) => task !== items[index - 1 - minusIndex]);
+    }
+    else{
+      updatedItems = items.filter((task) => task !== items[index - minusIndex]);
+    }
+
+    onSwipeableOpen(index);
     setItems(updatedItems);
-    onSwipeableOpen(index)
+
     if(direction == "left"){
       setCount(count - 1);
-      setXp(xp + 5)
-      setCoin(coin + 5);
-      await updateStats(profile,coin + 5, xp + 5);
-      setUpdateStatusBar(true);
-      setFadeText(true);
-
-      setTimeout(() => {setFadeText(false);setUpdateStatusBar(false);}, 1000)
+      setUpdate(update + 5)
     } 
     else{
     }
-   
   };
-
   const onSwipeableOpen = (index) => {
-    const swipeable = swipeableRefs.current.get(index);
-    if (swipeable) {
-      swipeable.close();
-    }
+      const swipeable = swipeableRefs.current.get(index);  
+      if (swipeable) {
+        swipeable.close();
+      }
+      setStarted(started-1);
   }
   const renderRightActions = (item) => {
     return (
-      <View className="w-[90%] h-12 mx-auto bg-red-400 justify-center">
+      <View className="w-[90%] h-14 mx-auto bg-red-400 justify-center">
       <Text className="text-white text-center">Deleting...</Text>
       <AntDesign
         name="minuscircle"
@@ -65,7 +116,7 @@ const SwipeableList = () => {
   };
   const renderLeftActions = (item) => {
     return (
-      <View className="w-[90%] h-12 bg-lime-400 justify-center mx-auto">
+      <View className="w-[90%] h-14 bg-lime-400 justify-center mx-auto">
         <Text className="text-white text-center">Completing...</Text>
         <AntDesign name="pluscircle" size={18} color="black" className="absolute left-1"/>
       </View>
@@ -79,20 +130,25 @@ const SwipeableList = () => {
   };
   const handleSwipeableClose = (item) => {
     setIsSwiping(false);
-    console.log(item);
   };
   const renderItem = ({ item,index }) => (
     <GestureHandlerRootView>
       <Swipeable
         enabled = {!isSwiping}
+        friction={0.8}
+        leftThreshold={80}
         ref={(ref) => swipeableRefs.current.set(index,ref)}
         renderRightActions={() => renderRightActions(item)}
         renderLeftActions={() => renderLeftActions(item)}
-        onSwipeableClose={() => handleSwipeableClose(item)}
-        onSwipeableWillOpen={() => handleSwipeableOpen}
-        onSwipeableOpen={(direction) => deleteItem(item,index,direction)}
+        onSwipeableClose={() => {handleSwipeableClose(item)}}
+        onSwipeableWillOpen={() => {
+          setStarted(started+1);
+          handleSwipeableOpen;
+        }}
+        onSwipeableOpen={(direction) => {deleteItem(item,index,direction)}}
+        reset
       > 
-         <View className="w-[90%] h-12 mx-auto bg-black-200 mb-5 justify-center">
+         <View className="w-[90%] h-14 mx-auto bg-black-200 mb-5 justify-center">
                <AntDesign name="doubleleft" size={18} color="red" className="absolute left-1"/>          
                <Text className="text-center text-white font-medium">{item}</Text>
                <AntDesign name="doubleright" size={18} color="lime" className="absolute right-1"/>        
@@ -105,8 +161,11 @@ const SwipeableList = () => {
     <SafeAreaView className='bg-primary h-full'>
     <FlatList
       data={items}
+      scrollEnabled = {false}
+      nestedScrollEnabled = {true}
       renderItem={renderItem}
       keyExtractor={(item,index) => index.toString()}
+      pointerEvents={isSwiping ? 'none' : 'auto'}  
       ListHeaderComponent={
         <View>
           <View className='my-6 px-4 space-y-6'>
@@ -119,31 +178,55 @@ const SwipeableList = () => {
                     {user?.username}
                   </Text> 
                 </View>
-                {/*<View className='flex-row items-center space-x-2'>
-                    <Text className='text-2xl font-psemibold text-white text-right mr-2'>
-                      {profile?.coin}
-                    </Text>
-                    <FontAwesome5 name="coins" size={30} color="orange"/>
-                  </View>*/}
+                <View className='flex-row items-center space-x-2'>
+                    <Feather name="settings" size={28} color="white"  />
+                </View>
               </View>
+              {/*<View className="p-4">
+                <View className="flex-row justify-between items-center mb-4">
+                  <TouchableOpacity onPress={() => changeWeek('prev')} className="p-2 rounded-lg">
+                    <AntDesign name="caretleft" size={20} color="white" />
+                  </TouchableOpacity>
+                  <Text className="text-lg font-bold text-white">{currentWeek.format('MMM YYYY')}</Text>
+                  <TouchableOpacity onPress={() => changeWeek('next')} className="p-2 rounded">
+                    <AntDesign name="caretright" size={20} color="white" />
+                  </TouchableOpacity>
+                </View>
 
-        <Progressbar
-        title="Level"
-        level={profile?.level}
-        current={xp}
-        change = {updateStatusBar}
-        max={profile?.level * 600}
-        color="bg-blue-600"
-        text="XP"
-        styleContainer="mb-5"
-      />
-       <Progressbar
+                <View className="flex-row justify-between">
+                  {getWeekDays().map((day) => (
+                    <TouchableOpacity
+                      key={day.format('YYYY-MM-DD')}
+                      className="flex items-center bg-black w-12 h-16"
+                      style = {{
+                        borderWidth : 1,
+                        borderColor : "#e3e3e3",
+                        borderRadius: 8,
+                      }}
+                    > 
+                      <Text className="font-pbold text-gray-400" style={{fontSize: 13}}>{day.format('ddd')}</Text>
+                      <Text className="text-lg text-white pb-2">{day.format('D')}</Text>
+                    </TouchableOpacity>
+                  ))}
+                </View>
+              </View>*/}
+              <Progressbar
+                title="Level"
+                level={profile?.level}
+                current={xp}
+                change = {updateStatusBar}
+                max={profile?.level * 600}
+                color="bg-blue-600"
+                text="XP"
+                styleContainer="mb-5"
+              />
+              <Progressbar
                 current={profile?.HP}
                 max={50}
                 color="bg-red-500"
                 text="HP"
               />
-        <View className='flex-row space-x-2 justify-end mt-2'>
+             <View className='flex-row space-x-2 justify-end mt-2'>
                 <FontAwesome5 name="gem" size={18} color="green" className="mr-1 mt-1" />
                 <Text className='text-xl font-psemibold text-white text-right mr-4'>
                   {profile?.diamond}
@@ -160,9 +243,14 @@ const SwipeableList = () => {
                   <Text className='text-white font-pregular text-xl'> {profile.tasks.length - count} </Text>
                   <AntDesign name="check" size={24} color="green"/>
               </View>
-              {fadeText && <TextFade/>}     
-      </View>
-      </View>
+              {fadeText && <TextFade
+                update = {updateFull}
+              />}   
+              <View className='mt-7'>
+              </View>
+
+          </View>
+        </View>
       }
       contentContainerStyle = {styles.listContent}
       ListEmptyComponent={

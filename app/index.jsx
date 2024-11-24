@@ -10,7 +10,7 @@ const advantage = [
   { id:'1', title: "- A well formed structure that will help you achieve your goals"},
   { id:'2', title: "- The addition of making it a game so maintining your habits becomes easier "},
   { id:'3', title: "- Large options to customize your experience"},
-  { id:'4', title: "- Simple design to make it user friendly"}
+  { id:'4', title: "- Minimalist design to make it user friendly"}
 ]
 const index = () => {
   const {isLoading, isLoggedIn, isProfileIn} = useGlobalContext();

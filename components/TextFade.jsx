@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from "react";
 import { View, Animated, Text } from "react-native";
 import { FontAwesome5, FontAwesome6 } from "@expo/vector-icons";
 
-const TextFade = () => {
+const TextFade = ({update}) => {
   const [isAnimationDone, setIsAnimationDone] = useState(false);
   const translateY = useRef(new Animated.Value(0)).current;
   const opacity = useRef(new Animated.Value(1)).current;
@@ -25,13 +25,12 @@ const TextFade = () => {
     });
   }, [translateY, opacity]);
 
-  if (isAnimationDone) {
+  if (isAnimationDone || update == 0) {
     return (
       <View>
       </View>
     );
   }
-
   return (
     <View className="flex-1 justify-center items-center flex-row">
       <Animated.Text
@@ -41,8 +40,8 @@ const TextFade = () => {
           opacity,
         }}
       >
-        <FontAwesome6 name="diamond" size={18} color="aqua" /> 5 XP{" "}
-        <FontAwesome5 name="coins" size={18} color="orange" className="mr-1 mt-1" /> 5
+        <FontAwesome6 name="diamond" size={18} color="aqua" /> {update} XP
+        <FontAwesome5 name="coins" size={18} color="orange" className="ml-1 mt-1" /> {update}
       </Animated.Text>
     </View>
   );
