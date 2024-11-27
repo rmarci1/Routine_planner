@@ -1,4 +1,4 @@
-import { getCurrentProfile, getCurrentUser } from "@/lib/appwrite";
+import { createAlltasks, getCurrentProfile, getCurrentUser, getTasks } from "@/lib/appwrite";
 import { createContext, useContext, useState, useEffect } from "react";
 
 const GlobalContext = createContext();
@@ -38,13 +38,27 @@ const GlobalProvider = ({children}) =>{
         .then((res) => {
             setIsLoading(true);
             if(res) {
-                setProfile(res);
                 setIsProfileIn(true);
+                setProfile(res);
+                let all_tasks = [];
+                let remaining_tasks = [];
+                
+                getTasks(res)
+                .then( async (task) => {
+                    task.forEach(element => {
+                        all_tasks.push(element.task);
+                        if(!element.done){
+                            remaining_tasks.push(element.task);
+                        }
+                    });
+                    let new_profile = await createAlltasks(res,all_tasks,remaining_tasks);
+                    setProfile(new_profile);
+                });
             }
             else{
                 setProfile(null);
                 setIsProfileIn(false);
-            }
+            }   
         })
         .catch((error) => {
             console.log(error);
@@ -52,6 +66,8 @@ const GlobalProvider = ({children}) =>{
         .finally(() => {
             setIsLoading(false);
         })
+    }, []);
+    useEffect(() => {
     }, []);
     return (
         <GlobalContext.Provider
