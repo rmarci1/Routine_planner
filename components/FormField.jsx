@@ -5,7 +5,6 @@ import Entypo from '@expo/vector-icons/Entypo';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 const FormField = ({title,value,handleChangeText,otherStyles,placeholder}) => {
   const [showPassword, setShowPassword] = useState(false)
-  
   return (
     <View className={`space-y-2 ${otherStyles}`}>
       <Text className='text-white text-2xl font-pmedium pl-2 pb-3'>{title}</Text>
@@ -32,14 +31,19 @@ const FormField = ({title,value,handleChangeText,otherStyles,placeholder}) => {
               <MaterialIcons name="key" size={24} color="white"  className='pr-2' />
             )
           } 
-        <TextInput
-          className='text-white font-psemibold text-lg flex-1 pb-3'
-          value={value}
-          placeholder={placeholder}
-          placeholderTextColor="#7b7b8b"
-          onChangeText={handleChangeText}
-          secureTextEntry = {(title === 'Password' || title ==="Confirm Password") && !showPassword}
-        />
+        
+          <View>
+          <TextInput
+            className='text-white font-psemibold text-lg flex-1 pb-3'
+            value={value}
+            placeholder={placeholder}
+            placeholderTextColor="#7b7b8b"
+            onChangeText={handleChangeText}
+            secureTextEntry = {(title === 'Password' || title ==="Confirm Password") && !showPassword}
+          />
+          </View>
+        
+       
         {
           (title === 'Password' || title ==="Confirm Password") && (
               <TouchableOpacity onPress={() => setShowPassword(!showPassword)}>

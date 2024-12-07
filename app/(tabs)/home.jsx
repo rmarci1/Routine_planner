@@ -40,7 +40,7 @@ const SwipeableList = () => {
 
   const [minusIndex, setMinusIndex] = useState(0);
   const [isSwiping, setIsSwiping] = useState(false);
-
+  const [indexlist, setindexList] = useState([]);
   const swipeableRefs = useRef(new Map());
   /*const [currentWeek, setCurrentWeek] = useState(moment());*/
   useEffect(() => {
@@ -80,6 +80,8 @@ const SwipeableList = () => {
   };*/
 
   const deleteItem = async (item,index,direction) => {
+    console.log("deleting..." + index)
+    console.log(indexlist);
     setMax(Math.max(max,index-minusIndex));
     let updatedItems = null;
     if(index > max && max != 0){
@@ -88,6 +90,7 @@ const SwipeableList = () => {
     }
     else{
       updatedItems = tasks.filter((task) => task !== tasks[index - minusIndex]);
+      console.log(updatedItems.map((item) => item.task))
     }
 
     onSwipeableOpen(index);
@@ -104,7 +107,7 @@ const SwipeableList = () => {
       const swipeable = swipeableRefs.current.get(index);  
       if (swipeable) {
         swipeable.close();
-      }
+      } 
       setStarted(started-1);
   }
   const renderRightActions = (item) => {
@@ -130,12 +133,10 @@ const SwipeableList = () => {
 
   };
   const handleSwipeableOpen = () => {
-    if (!isSwiping) {
-      setIsSwiping(true);
-    }
   };
-  const handleSwipeableClose = (item) => {
+  const handleSwipeableClose = () => {
     setIsSwiping(false);
+    console.log("ended");
   };
   const getIcon = (icon,text_color) => {
       const [group, name] = icon.split(",", 2);
@@ -170,6 +171,8 @@ const SwipeableList = () => {
         onSwipeableClose={() => {handleSwipeableClose(item)}}
         onSwipeableWillOpen={() => {
           setStarted(started+1);
+          setIsSwiping(true);
+          setindexList([...indexlist, index]);
           handleSwipeableOpen;
         }}
         onSwipeableOpen={(direction) => {deleteItem(item,index,direction)}}
@@ -177,7 +180,7 @@ const SwipeableList = () => {
       > 
          <View className="w-[90%] h-14 mx-auto bg-black-200 mb-5 justify-center items-center">
                <AntDesign name="doubleleft" size={18} color="red" className="absolute left-1"/>          
-               <Text className={`text-center text-[${item.color}] font-medium text-lg`}>{item.task} {getIcon(item.icon,item.color)}</Text>
+               <Text className={`text-center font-medium text-lg`} style={{color: item.color}}>{item.task} {getIcon(item.icon,item.color)}</Text>
                <AntDesign name="doubleright" size={18} color="lime" className="absolute right-1"/>        
              </View>
       </Swipeable>
@@ -283,7 +286,7 @@ const SwipeableList = () => {
       ListEmptyComponent={
           <View>
             <EmptyState
-              state={profile.tasks>0? true:false}
+              state={profile.tasks.length>0? true:false}
             />
           </View>
         }

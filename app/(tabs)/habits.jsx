@@ -1,4 +1,4 @@
-import { View, Text, StyleSheet, TouchableOpacity, Alert, Switch, ScrollView, FlatList } from 'react-native'
+import { View, Text, StyleSheet, TouchableOpacity, Alert, Switch, ScrollView, FlatList, Button } from 'react-native'
 import React, { useEffect, useState } from 'react'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { Calendar, LocaleConfig } from 'react-native-calendars';
@@ -20,6 +20,9 @@ import CustomButton from '@/components/CustomButton';
 import { router } from 'expo-router';
 import SwipeableBox from '@/components/SwipeableBox';
 import EmptyState from '@/components/EmptyState';
+import DatePicker from 'react-native-date-picker';
+import DateTimePicker from 'react-native-modal-datetime-picker';
+import DateChanger from '@/components/DateChanger';
 LocaleConfig.locales['fr'] = {
   monthNames: [
     'January',
@@ -134,7 +137,7 @@ const habits = () => {
     return Dates;
   }
   const eventHandlerer = () => {
-    setForm({...form, date: selected === "" ? date : selected})
+    setForm({...form, date: selected === "" ? form.date : new Date(selected)})
     setIsPressed(true);
   }
   const change = (group,name) => {
@@ -174,6 +177,11 @@ const habits = () => {
       setIsSubmitting(false);
     }
   }
+
+  const handleConfirm = (selectedDate) => {
+    setForm({...form,date: selectedDate})
+    hideDatePicker();
+  };
   return (
     <SafeAreaView className='h-full bg-primary'>
       {isPressed ?      
@@ -189,8 +197,15 @@ const habits = () => {
             </TouchableOpacity>
           </View>
         </View>
+        <View>
+          <DateChanger
+            title="Date: "
+            date={form.date}
+            handleConfirm={handleConfirm}
+          />
+        </View>
+
       <View className='flex-row items-center mt-5 justify-center'>
-      
        <Text className='text-white text-lg font-pmedium'>Daily repeat: </Text>
        <Switch
           trackColor={{ false: '#767577', true: '#81b0ff' }}
