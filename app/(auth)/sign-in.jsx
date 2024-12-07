@@ -6,10 +6,10 @@ import { Link, router } from 'expo-router'
 import FormField from '@/components/FormField'
 import CustomButton from '@/components/CustomButton'
 import CheckBox from 'expo-checkbox'
-import { signIn,getCurrentUser,updateUser, getCurrentProfile } from '@/lib/appwrite'
+import { signIn,getCurrentUser,updateUser, getCurrentProfile, getTasks, createAlltasks } from '@/lib/appwrite'
 import { useGlobalContext } from '@/context/GlobalProvider'
 const Signin = () => {
-  const {setUser, setIsLoggedIn,setProfile,setIsProfileIn} = useGlobalContext()
+  const {setUser, setIsLoggedIn,setProfile,setIsProfileIn, setTasks} = useGlobalContext()
   const [form, setForm] = useState({
     email : '',
     password: ''
@@ -32,7 +32,20 @@ const Signin = () => {
 
       const profile = await getCurrentProfile();
       
-      setProfile(profile);
+      getTasks(profile).then( async (task) => {
+        let all_tasks = [];
+        let remaining_tasks = [];
+                
+        task.forEach(element => {
+            all_tasks.push(element.task);
+            if(!element.done){
+                remaining_tasks.push(element);
+            }
+        });
+        let new_profile = await createAlltasks(res,all_tasks);
+        setProfile(new_profile);
+        setTasks(remaining_tasks);
+      });
       setIsProfileIn(true);
       router.replace('/(tabs)/home');
 

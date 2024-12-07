@@ -6,27 +6,32 @@ import { LocaleConfig } from 'react-native-calendars';
 import moment from 'moment';
 
 import { useGlobalContext } from "@/context/GlobalProvider";
-import { updateStats } from "@/lib/appwrite";
+import { getTasks, updateStats, useAppwrite } from "@/lib/appwrite";
 import Progressbar from "@/components/Progressbar";
 import EmptyState from "@/components/EmptyState";
 import TextFade from "@/components/TextFade";
 
+import Entypo from '@expo/vector-icons/Entypo';
+import AntDesign from '@expo/vector-icons/AntDesign';
 import Feather from '@expo/vector-icons/Feather';
+import FontAwesome from '@expo/vector-icons/FontAwesome';
+import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 import FontAwesome5 from '@expo/vector-icons/FontAwesome5';
-import { AntDesign } from '@expo/vector-icons';
+import MaterialIcons from '@expo/vector-icons/MaterialIcons';
+import Ionicons from '@expo/vector-icons/Ionicons';
 
 const SwipeableList = () => {
 
-  const { user, profile, setProfile } = useGlobalContext();
+  const { user, profile, setProfile,tasks,setTasks } = useGlobalContext();
   const [initialize, setInitialize] = useState(false);
-  const [items, setItems] = useState(profile.tasks_left);
   const [xp, setXp] = useState(profile.XP);
   const [update, setUpdate] = useState(0);
   const [updateFull, setUpdateFull] = useState(0);
   const [lastSwipe, setlastSwipe] = useState(false);
 
   const [coin, setCoin] = useState(profile.coin);
-  const [count,setCount] = useState(profile.tasks_left.length);
+  const [count,setCount] = useState(0);
+
   const [fadeText, setFadeText] = useState(false);
   const [updateStatusBar, setUpdateStatusBar] = useState(false);
 
@@ -38,8 +43,9 @@ const SwipeableList = () => {
 
   const swipeableRefs = useRef(new Map());
   /*const [currentWeek, setCurrentWeek] = useState(moment());*/
-
-  const [gestureStarted, setGestureStarted] = useState(false);
+  useEffect(() => {
+    setCount(tasks.length);
+  })
   useEffect(() => {
     if(started == 0 && initialize){
       setMax(0);
@@ -78,14 +84,14 @@ const SwipeableList = () => {
     let updatedItems = null;
     if(index > max && max != 0){
       setMinusIndex(minusIndex - 1);
-      updatedItems = items.filter((task) => task !== items[index - 1 - minusIndex]);
+      updatedItems = tasks.filter((task) => task !== tasks[index - 1 - minusIndex]);
     }
     else{
-      updatedItems = items.filter((task) => task !== items[index - minusIndex]);
+      updatedItems = tasks.filter((task) => task !== tasks[index - minusIndex]);
     }
 
     onSwipeableOpen(index);
-    setItems(updatedItems);
+    setTasks(updatedItems);
 
     if(direction == "left"){
       setCount(count - 1);
@@ -131,6 +137,27 @@ const SwipeableList = () => {
   const handleSwipeableClose = (item) => {
     setIsSwiping(false);
   };
+  const getIcon = (icon,text_color) => {
+      const [group, name] = icon.split(",", 2);
+      switch(group){
+        case "AntDesign" :
+            return <AntDesign name={name} size={18} color={text_color}/>
+        case "Entypo" :
+            return <Entypo name={name} size={18} color={text_color}/>
+        case "Feather" :
+            return <Feather name={name} size={18} color={text_color}/>
+        case "FontAwesome" :
+            return <FontAwesome name={name} size={18} color={text_color}/>
+        case "MaterialCommunityIcons" : 
+            return <MaterialCommunityIcons name={name} size={18} color={text_color}/>
+        case "FontAwesome5" : 
+            return <FontAwesome5 name={name} size={18} color={text_color}/>
+        case "MaterialIcons" : 
+            return <MaterialIcons name={name} size={18} color={text_color}/>
+        case "Ionicons" : 
+            return <Ionicons name={name} size={18} color={text_color}/>
+      }
+  }
   const renderItem = ({ item,index }) => (
     <GestureHandlerRootView>
       <Swipeable
@@ -148,9 +175,9 @@ const SwipeableList = () => {
         onSwipeableOpen={(direction) => {deleteItem(item,index,direction)}}
         reset
       > 
-         <View className="w-[90%] h-14 mx-auto bg-black-200 mb-5 justify-center">
+         <View className="w-[90%] h-14 mx-auto bg-black-200 mb-5 justify-center items-center">
                <AntDesign name="doubleleft" size={18} color="red" className="absolute left-1"/>          
-               <Text className="text-center text-white font-medium">{item}</Text>
+               <Text className={`text-center text-[${item.color}] font-medium text-lg`}>{item.task} {getIcon(item.icon,item.color)}</Text>
                <AntDesign name="doubleright" size={18} color="lime" className="absolute right-1"/>        
              </View>
       </Swipeable>
@@ -160,7 +187,7 @@ const SwipeableList = () => {
   return (
     <SafeAreaView className='bg-primary h-full'>
     <FlatList
-      data={items}
+      data={tasks}
       scrollEnabled = {false}
       nestedScrollEnabled = {true}
       renderItem={renderItem}
@@ -255,7 +282,9 @@ const SwipeableList = () => {
       contentContainerStyle = {styles.listContent}
       ListEmptyComponent={
           <View>
-            <EmptyState/>
+            <EmptyState
+              state={profile.tasks>0? true:false}
+            />
           </View>
         }
     />

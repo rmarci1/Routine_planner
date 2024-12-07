@@ -1,6 +1,6 @@
 import { View, Text, TouchableOpacity } from 'react-native'
 import React from 'react'
-const LogoButton = async ({logo,change}) => {
+const LogoButton = ({logo,change}) => {
 
   return (
     <View className=''>

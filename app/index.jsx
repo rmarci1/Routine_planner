@@ -15,7 +15,7 @@ const advantage = [
 const index = () => {
   const {isLoading, isLoggedIn, isProfileIn} = useGlobalContext();
 
-  if(!isLoading && isLoggedIn && isProfileIn) return <Redirect href="/tasks" />
+  if(!isLoading && isLoggedIn && isProfileIn) return <Redirect href="/habits" />
 
   return (
     <SafeAreaView className='bg-primary h-full'>
@@ -32,7 +32,7 @@ const index = () => {
           ListHeaderComponent={() => (
             <View>
               <Text className='text-3xl text-white mt-10 text-center font-psemibold'>Welcome to 
-                           {/* Itt még kikéne találnom egy nevet */} Roplan!</Text>
+                           {/* Itt még kikéne találnom egy nevet */} Swipe It!</Text>
             <View className='relative'>
               <Text className='text-lg text-white mt-5 text-center font-pregular'>
                 Here you can explore the endless possibilites of creating your

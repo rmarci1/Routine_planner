@@ -24,7 +24,7 @@ const TabIcon = ({color,name,focused}) =>{
             )
           }
             {
-            name === "Tasks" && (
+            name === "Habits" && (
               <FontAwesome5 name="tasks" size={26} color={color} />
             )
           }
@@ -66,14 +66,14 @@ const _layout = () => {
       }}
     />
      <Tabs.Screen
-      name='tasks'
+      name='habits'
       options={{
-          title : 'Tasks',
+          title : 'Habits',
           headerShown : false,
           tabBarIcon: ({color,focused}) => (
             <TabIcon
                 color = {color}
-                name = "Tasks"
+                name = "Habits"
                 focused = {focused}
             />
         )

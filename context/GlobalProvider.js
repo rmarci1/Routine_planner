@@ -10,6 +10,7 @@ const GlobalProvider = ({children}) =>{
     const [isProfileIn, setIsProfileIn] = useState(false);
     const [user, setUser] = useState(null);
     const [isLoading, setIsLoading] = useState(true);
+    const [tasks, setTasks] = useState(null);
     const [profile, setProfile] = useState(null);
     useEffect(() => {
         getCurrentUser()
@@ -48,12 +49,13 @@ const GlobalProvider = ({children}) =>{
                     task.forEach(element => {
                         all_tasks.push(element.task);
                         if(!element.done){
-                            remaining_tasks.push(element.task);
+                            remaining_tasks.push(element);
                         }
                     });
-                    let new_profile = await createAlltasks(res,all_tasks,remaining_tasks);
+                    let new_profile = await createAlltasks(res,all_tasks);
                     setProfile(new_profile);
                 });
+                setTasks(remaining_tasks);
             }
             else{
                 setProfile(null);
@@ -80,7 +82,9 @@ const GlobalProvider = ({children}) =>{
                 profile,
                 setProfile,
                 isProfileIn,
-                setIsProfileIn
+                setIsProfileIn,
+                tasks,
+                setTasks,
             }}
         >
             {children}
