@@ -25,9 +25,7 @@ const SwipeableList = () => {
   const { user, profile, setProfile,tasks,setTasks } = useGlobalContext();
   const [initialize, setInitialize] = useState(false);
   const [xp, setXp] = useState(profile.XP);
-  const [update, setUpdate] = useState(0);
   const [updateFull, setUpdateFull] = useState(0);
-  const [lastSwipe, setlastSwipe] = useState(false);
 
   const [coin, setCoin] = useState(profile.coin);
   const [count,setCount] = useState(0);
@@ -35,37 +33,14 @@ const SwipeableList = () => {
   const [fadeText, setFadeText] = useState(false);
   const [updateStatusBar, setUpdateStatusBar] = useState(false);
 
-  const [started, setStarted] = useState(0)
-  const [max,setMax] = useState(0);
-
-  const [minusIndex, setMinusIndex] = useState(0);
   const [isSwiping, setIsSwiping] = useState(false);
   const [indexlist, setindexList] = useState([]);
+  const [limit,setLimit] = useState(0);
   const swipeableRefs = useRef(new Map());
   /*const [currentWeek, setCurrentWeek] = useState(moment());*/
   useEffect(() => {
     setCount(tasks.length);
   })
-  useEffect(() => {
-    if(started == 0 && initialize){
-      setMax(0);
-      setMinusIndex(0);
-      setUpdateFull(update + 5);    
-      setUpdateStatusBar(true);
-      setFadeText(true)   
-    }
-  }, [started])
-  useEffect(() => {
-    if(initialize){
-      updateStats(profile, coin + updateFull, xp + updateFull);
-      setXp(xp + updateFull);
-      setCoin(coin + updateFull);
-      setTimeout(() => {setFadeText(false);setUpdateStatusBar(false);setUpdateFull(0)}, 1000)
-      setUpdate(0); 
-    }
-    setInitialize(true);
-  }, [updateFull])
-
   /*const getWeekDays = () => {
     const startOfWeek = currentWeek.clone().startOf('week');
     const weekDays = [];
@@ -79,36 +54,33 @@ const SwipeableList = () => {
     setCurrentWeek((prev) => prev.clone().add(direction === 'next' ? 7 : -7, 'days'));
   };*/
 
-  const deleteItem = async (item,index,direction) => {
-    console.log("deleting..." + index)
-    console.log(indexlist);
-    setMax(Math.max(max,index-minusIndex));
-    let updatedItems = null;
-    if(index > max && max != 0){
-      setMinusIndex(minusIndex - 1);
-      updatedItems = tasks.filter((task) => task !== tasks[index - 1 - minusIndex]);
+  const deleteItem = (direction) => {
+    let list = [...new Set(indexlist)];
+    let updatedItems = tasks;
+    let update = 0;
+    list.sort((a,b) => b-a);
+    console.log(list);
+    for (let index = 0; index < list.length; index++) {
+      onSwipeableOpen(list[index]);
+      updatedItems = updatedItems.filter((task) => task !== tasks[list[index]]);
+      update+=5;
     }
-    else{
-      updatedItems = tasks.filter((task) => task !== tasks[index - minusIndex]);
-      console.log(updatedItems.map((item) => item.task))
-    }
-
-    onSwipeableOpen(index);
     setTasks(updatedItems);
-
-    if(direction == "left"){
-      setCount(count - 1);
-      setUpdate(update + 5)
-    } 
-    else{
-    }
+    setUpdateFull(update);
+    setXp(xp + update);
+    setCoin(xp + update);
+    updateStats(profile, coin + update, xp + update)
+    setUpdateStatusBar(true);
+    setFadeText(true);   
+    setTimeout(() => {setFadeText(false);setUpdateStatusBar(false);setUpdateFull(0)}, 1000)
+    setindexList([]);
+    setIsSwiping(false);
   };
   const onSwipeableOpen = (index) => {
       const swipeable = swipeableRefs.current.get(index);  
       if (swipeable) {
         swipeable.close();
       } 
-      setStarted(started-1);
   }
   const renderRightActions = (item) => {
     return (
@@ -132,12 +104,7 @@ const SwipeableList = () => {
     );
 
   };
-  const handleSwipeableOpen = () => {
-  };
-  const handleSwipeableClose = () => {
-    setIsSwiping(false);
-    console.log("ended");
-  };
+
   const getIcon = (icon,text_color) => {
       const [group, name] = icon.split(",", 2);
       switch(group){
@@ -161,19 +128,19 @@ const SwipeableList = () => {
   }
   const renderItem = ({ item,index }) => (
     <GestureHandlerRootView>
-      <Swipeable
+      <Swipeable    
         enabled = {!isSwiping}
         friction={0.8}
         leftThreshold={80}
         ref={(ref) => swipeableRefs.current.set(index,ref)}
         renderRightActions={() => renderRightActions(item)}
         renderLeftActions={() => renderLeftActions(item)}
-        onSwipeableClose={() => {handleSwipeableClose(item)}}
         onSwipeableWillOpen={() => {
-          setStarted(started+1);
-          setIsSwiping(true);
+          if(limit>1){
+            setIsSwiping(true);
+          }
+          setLimit(limit+1);
           setindexList([...indexlist, index]);
-          handleSwipeableOpen;
         }}
         onSwipeableOpen={(direction) => {deleteItem(item,index,direction)}}
         reset
