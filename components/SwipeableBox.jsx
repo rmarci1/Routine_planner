@@ -3,7 +3,7 @@ import {Text, View} from "react-native";
 import { GestureHandlerRootView, Swipeable } from "react-native-gesture-handler";
 
 import { useGlobalContext } from "@/context/GlobalProvider";
-import {updateStats} from "@/lib/appwrite";
+import {updateAnythinginProfile, updateStats} from "@/lib/appwrite";
 import TextFade from "@/components/TextFade";
 
 import Entypo from '@expo/vector-icons/Entypo';
@@ -14,79 +14,51 @@ import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 import FontAwesome5 from '@expo/vector-icons/FontAwesome5';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import Ionicons from '@expo/vector-icons/Ionicons';
+import { getIcon } from "@/context/icon";
 
 const SwipeableBox = ({item,index}) => {
-    const { user, profile, setProfile,tasks,setTasks } = useGlobalContext();
-    const [initialize, setInitialize] = useState(false);
-    const [xp, setXp] = useState(profile.XP);
-    const [update, setUpdate] = useState(0);
+    const { user, profile, setProfile,tasks,setTasks} = useGlobalContext();
     const [updateFull, setUpdateFull] = useState(0);
-    const [lastSwipe, setlastSwipe] = useState(false);
   
-    const [coin, setCoin] = useState(profile.coin);
     const [count,setCount] = useState(0);
-  
+    const [limit, setLimit] = useState(0);
     const [fadeText, setFadeText] = useState(false);
     const [updateStatusBar, setUpdateStatusBar] = useState(false);
-  
-    const [started, setStarted] = useState(0)
-    const [max,setMax] = useState(0);
-  
-    const [minusIndex, setMinusIndex] = useState(0);
+    const [indexlist, setindexList] = useState([]);
     const [isSwiping, setIsSwiping] = useState(false);
 
     const swipeableRefs = useRef(new Map());
     useEffect(() => {
         setCount(tasks.length);
       })
-      useEffect(() => {
-        if(started == 0 && initialize){
-          setMax(0);
-          setMinusIndex(0);
-          setUpdateFull(update + 5);    
+      const deleteItem = async (item,index,direction) => {
+          let list = [...new Set(indexlist)];
+          let updatedItems = tasks;
+          let update = 0;
+          list.sort((a,b) => b-a);
+          for (let index = 0; index < list.length; index++) {
+            onSwipeableOpen(list[index]);
+            updatedItems = updatedItems.filter((task) => task !== tasks[list[index]]);
+            update+=5;
+          }
+          setTasks(updatedItems);
+          setUpdateFull(update);
+
+          const result = await updateAnythinginProfile(profile,profile.XP + update, profile.coin + update);
+          setProfile(result);
           setUpdateStatusBar(true);
-          setFadeText(true)   
-        }
-      }, [started])
-      useEffect(() => {
-        if(initialize){
-          updateStats(profile, coin + updateFull, xp + updateFull);
-          setXp(xp + updateFull);
-          setCoin(coin + updateFull);
+          setFadeText(true);   
           setTimeout(() => {setFadeText(false);setUpdateStatusBar(false);setUpdateFull(0)}, 1000)
-          setUpdate(0); 
-        }
-        setInitialize(true);
-      }, [updateFull])
-    useEffect
-    const deleteItem = async (item,index,direction) => {
-        setMax(Math.max(max,index-minusIndex));
-        let updatedItems = null;
-        if(index > max && max != 0){
-          setMinusIndex(minusIndex - 1);
-          updatedItems = tasks.filter((task) => task !== tasks[index - 1 - minusIndex]);
-        }
-        else{
-          updatedItems = tasks.filter((task) => task !== tasks[index - minusIndex]);
-        }
-    
-        onSwipeableOpen(index);
-        setTasks(updatedItems);
-    
-        if(direction == "left"){
-          setCount(count - 1);
-          setUpdate(update + 5)
-        } 
-        else{
-        }
+
+          setindexList([]);
+          setIsSwiping(false);
       };
       const onSwipeableOpen = (index) => {
-          const swipeable = swipeableRefs.current.get(index);  
-          if (swipeable) {
-            swipeable.close();
-          }
-          setStarted(started-1);
-      }
+        const swipeable = swipeableRefs.current.get(index);  
+        if (swipeable) {
+          swipeable.close();
+        } 
+    }
       const renderRightActions = (item) => {
         return (
           <View className="w-[90%] h-14 mx-auto bg-red-400 justify-center">
@@ -109,61 +81,38 @@ const SwipeableBox = ({item,index}) => {
         );
     
       };
-      const handleSwipeableOpen = () => {
-        if (!isSwiping) {
-          setIsSwiping(true);
-        }
-      };
-      const handleSwipeableClose = (item) => {
-        setIsSwiping(false);
-      };
-      const getIcon = (icon,text_color) => {
-          const [group, name] = icon.split(",", 2);
-          switch(group){
-            case "AntDesign" :
-                return <AntDesign name={name} size={18} color={text_color}/>
-            case "Entypo" :
-                return <Entypo name={name} size={18} color={text_color}/>
-            case "Feather" :
-                return <Feather name={name} size={18} color={text_color}/>
-            case "FontAwesome" :
-                return <FontAwesome name={name} size={18} color={text_color}/>
-            case "MaterialCommunityIcons" : 
-                return <MaterialCommunityIcons name={name} size={18} color={text_color}/>
-            case "FontAwesome5" : 
-                return <FontAwesome5 name={name} size={18} color={text_color}/>
-            case "MaterialIcons" : 
-                return <MaterialIcons name={name} size={18} color={text_color}/>
-            case "Ionicons" : 
-                return <Ionicons name={name} size={18} color={text_color}/>
-          }
-      }
   return (
     <View>
     <GestureHandlerRootView>
-      <Swipeable
+    <Swipeable    
         enabled = {!isSwiping}
         friction={0.8}
         leftThreshold={80}
         ref={(ref) => swipeableRefs.current.set(index,ref)}
         renderRightActions={() => renderRightActions(item)}
         renderLeftActions={() => renderLeftActions(item)}
-        onSwipeableClose={() => {handleSwipeableClose(item)}}
         onSwipeableWillOpen={() => {
-          setStarted(started+1);
-          handleSwipeableOpen;
+          if(limit>1){
+            setIsSwiping(true);
+          }
+          setLimit(limit+1);
+          setindexList([...indexlist, index]);
         }}
         onSwipeableOpen={(direction) => {deleteItem(item,index,direction)}}
         reset
       > 
          <View className="w-[90%] h-14 mx-auto bg-black-200 mb-5 justify-center items-center">
-         {fadeText && <TextFade
-                update = {updateFull}
-              />}  
                <AntDesign name="doubleleft" size={18} color="red" className="absolute left-1"/>          
                <Text className={`text-center font-medium text-lg`} style={{color: item.color}}>{item.task} {getIcon(item.icon,item.color)}</Text>
-               <AntDesign name="doubleright" size={18} color="lime" className="absolute right-1"/>   
-         </View>
+               <AntDesign name="doubleright" size={18} color="lime" className="absolute right-1"/>        
+          </View>
+          {
+             fadeText && (
+                <TextFade
+                  update = {updateFull}
+                />
+             )
+          }
       </Swipeable>
     </GestureHandlerRootView>
     </View>

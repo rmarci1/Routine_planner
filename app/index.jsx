@@ -13,9 +13,9 @@ const advantage = [
   { id:'4', title: "- Minimalist design to make it user friendly"}
 ]
 const index = () => {
-  const {isLoading, isLoggedIn, isProfileIn} = useGlobalContext();
+  const {isLoading, isLoggedIn, isProfileIn,isTasksIn,isAccessoriesIn} = useGlobalContext();
 
-  if(!isLoading && isLoggedIn && isProfileIn) return <Redirect href="/habits" />
+  if(!isLoading && isLoggedIn && isProfileIn && isTasksIn && isAccessoriesIn) return <Redirect href="/shop" />
 
   return (
     <SafeAreaView className='bg-primary h-full'>

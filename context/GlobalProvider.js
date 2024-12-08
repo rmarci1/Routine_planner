@@ -1,4 +1,4 @@
-import { createAlltasks, getCurrentProfile, getCurrentUser, getTasks } from "@/lib/appwrite";
+import { createAlltasks, getAccessories, getCurrentProfile, getCurrentUser, getTasks } from "@/lib/appwrite";
 import { createContext, useContext, useState, useEffect } from "react";
 
 const GlobalContext = createContext();
@@ -8,10 +8,13 @@ export const useGlobalContext = () => useContext(GlobalContext);
 const GlobalProvider = ({children}) =>{
     const [isLoggedIn, setIsLoggedIn] = useState(false);    
     const [isProfileIn, setIsProfileIn] = useState(false);
-    const [user, setUser] = useState(null);
+    const [isTasksIn, setIsTasksIn] = useState(false);
     const [isLoading, setIsLoading] = useState(true);
-    const [tasks, setTasks] = useState(null);
+    const [isAccessoriesIn, setIsAccessoriesIn] = useState(false);
+    const [user, setUser] = useState(null);
     const [profile, setProfile] = useState(null);
+    const [tasks, setTasks] = useState(null);
+    const [accessories, setAccessories] = useState(null);
     useEffect(() => {
         getCurrentUser()
         .then((res) => {
@@ -31,16 +34,13 @@ const GlobalProvider = ({children}) =>{
             console.log(error);
         })
         .finally(() => {
-            setIsLoading(false);
         })
     }, []);
     useEffect(() => {
         getCurrentProfile()
         .then((res) => {
-            setIsLoading(true);
             if(res) {
                 setIsProfileIn(true);
-                setProfile(res);
                 let all_tasks = [];
                 let remaining_tasks = [];
                 
@@ -56,20 +56,33 @@ const GlobalProvider = ({children}) =>{
                     setProfile(new_profile);
                 });
                 setTasks(remaining_tasks);
+                setIsTasksIn(true)
+
+                getAccessories(res)
+                .then((result) => {
+                    if(result){
+                        setAccessories(result);
+                        setIsAccessoriesIn(true);
+                    }
+                    else{
+                        setAccessories(null);
+                        setIsAccessoriesIn(false);
+                    }
+                });
             }
             else{
                 setProfile(null);
                 setIsProfileIn(false);
+                setTasks(null);
+                setIsTasksIn(false);
             }   
         })
         .catch((error) => {
             console.log(error);
         })
         .finally(() => {
-            setIsLoading(false);
+           setIsLoading(false);
         })
-    }, []);
-    useEffect(() => {
     }, []);
     return (
         <GlobalContext.Provider
@@ -85,6 +98,12 @@ const GlobalProvider = ({children}) =>{
                 setIsProfileIn,
                 tasks,
                 setTasks,
+                isTasksIn,
+                setIsTasksIn,
+                accessories,
+                setAccessories,
+                isAccessoriesIn,
+                setIsAccessoriesIn,
             }}
         >
             {children}

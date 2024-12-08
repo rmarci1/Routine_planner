@@ -1,12 +1,11 @@
-import React, { useCallback, useEffect, useRef, useState } from "react";
-import { FlatList, Text, View, TouchableOpacity, StyleSheet } from "react-native";
+import React, {useEffect, useRef, useState } from "react";
+import { FlatList, Text, View, StyleSheet } from "react-native";
 import { GestureHandlerRootView, Swipeable } from "react-native-gesture-handler";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { LocaleConfig } from 'react-native-calendars';
-import moment from 'moment';
 
 import { useGlobalContext } from "@/context/GlobalProvider";
-import { getTasks, updateStats, useAppwrite } from "@/lib/appwrite";
+import {updateAnythinginProfile, updateStats} from "@/lib/appwrite";
+import { getIcon } from "@/context/icon";
 import Progressbar from "@/components/Progressbar";
 import EmptyState from "@/components/EmptyState";
 import TextFade from "@/components/TextFade";
@@ -22,12 +21,10 @@ import Ionicons from '@expo/vector-icons/Ionicons';
 
 const SwipeableList = () => {
 
-  const { user, profile, setProfile,tasks,setTasks } = useGlobalContext();
+  const { user, profile, setProfile,tasks,setTasks} = useGlobalContext();
   const [initialize, setInitialize] = useState(false);
-  const [xp, setXp] = useState(profile.XP);
   const [updateFull, setUpdateFull] = useState(0);
 
-  const [coin, setCoin] = useState(profile.coin);
   const [count,setCount] = useState(0);
 
   const [fadeText, setFadeText] = useState(false);
@@ -54,12 +51,11 @@ const SwipeableList = () => {
     setCurrentWeek((prev) => prev.clone().add(direction === 'next' ? 7 : -7, 'days'));
   };*/
 
-  const deleteItem = (direction) => {
+  const deleteItem = async (direction) => {
     let list = [...new Set(indexlist)];
     let updatedItems = tasks;
     let update = 0;
     list.sort((a,b) => b-a);
-    console.log(list);
     for (let index = 0; index < list.length; index++) {
       onSwipeableOpen(list[index]);
       updatedItems = updatedItems.filter((task) => task !== tasks[list[index]]);
@@ -67,12 +63,13 @@ const SwipeableList = () => {
     }
     setTasks(updatedItems);
     setUpdateFull(update);
-    setXp(xp + update);
-    setCoin(xp + update);
-    updateStats(profile, coin + update, xp + update)
+
+    const result = await updateAnythinginProfile(profile, profile.XP + update, profile.coin + update);
+    setProfile(result);
     setUpdateStatusBar(true);
     setFadeText(true);   
     setTimeout(() => {setFadeText(false);setUpdateStatusBar(false);setUpdateFull(0)}, 1000)
+
     setindexList([]);
     setIsSwiping(false);
   };
@@ -104,28 +101,6 @@ const SwipeableList = () => {
     );
 
   };
-
-  const getIcon = (icon,text_color) => {
-      const [group, name] = icon.split(",", 2);
-      switch(group){
-        case "AntDesign" :
-            return <AntDesign name={name} size={18} color={text_color}/>
-        case "Entypo" :
-            return <Entypo name={name} size={18} color={text_color}/>
-        case "Feather" :
-            return <Feather name={name} size={18} color={text_color}/>
-        case "FontAwesome" :
-            return <FontAwesome name={name} size={18} color={text_color}/>
-        case "MaterialCommunityIcons" : 
-            return <MaterialCommunityIcons name={name} size={18} color={text_color}/>
-        case "FontAwesome5" : 
-            return <FontAwesome5 name={name} size={18} color={text_color}/>
-        case "MaterialIcons" : 
-            return <MaterialIcons name={name} size={18} color={text_color}/>
-        case "Ionicons" : 
-            return <Ionicons name={name} size={18} color={text_color}/>
-      }
-  }
   const renderItem = ({ item,index }) => (
     <GestureHandlerRootView>
       <Swipeable    
@@ -145,7 +120,7 @@ const SwipeableList = () => {
         onSwipeableOpen={(direction) => {deleteItem(item,index,direction)}}
         reset
       > 
-         <View className="w-[90%] h-14 mx-auto bg-black-200 mb-5 justify-center items-center">
+            <View className="w-[90%] h-14 mx-auto border-dotted bg-black-200 mb-5 justify-center items-center ">
                <AntDesign name="doubleleft" size={18} color="red" className="absolute left-1"/>          
                <Text className={`text-center font-medium text-lg`} style={{color: item.color}}>{item.task} {getIcon(item.icon,item.color)}</Text>
                <AntDesign name="doubleright" size={18} color="lime" className="absolute right-1"/>        
@@ -210,7 +185,7 @@ const SwipeableList = () => {
               <Progressbar
                 title="Level"
                 level={profile?.level}
-                current={xp}
+                current={profile?.XP}
                 change = {updateStatusBar}
                 max={profile?.level * 600}
                 color="bg-blue-600"
@@ -231,7 +206,7 @@ const SwipeableList = () => {
 
                 <FontAwesome5 name="coins" size={18} color="orange" className="mr-1 mt-1" />
                 <Text className='text-xl font-psemibold text-white text-right'>
-                  {coin}
+                  {profile?.coin}
                 </Text>
               </View>
               <View className='justify-center mt-4 flex-row'>
@@ -264,7 +239,7 @@ const SwipeableList = () => {
 
 const styles = StyleSheet.create({
   listContent: {
-    flexGrow: 1, // Ensures the content fills the available space
+    flexGrow: 1,
   },
 });
 export default SwipeableList;

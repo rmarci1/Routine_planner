@@ -9,7 +9,6 @@ import CustomButton from './CustomButton';
 import { router } from 'expo-router';
 const EmptyState = ({state}) => {
     const {profile} = useGlobalContext();
-    console.log(state)
     return (
         <View className='justify-center items-center mt-4'>
             {state && (

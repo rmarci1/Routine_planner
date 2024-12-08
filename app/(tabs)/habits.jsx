@@ -147,6 +147,7 @@ const habits = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const submit = async () => {
     setIsSubmitting(true);
+
     if(!form.task){
       Alert.alert("Error","You need to enter a task")
       return;
@@ -211,7 +212,6 @@ const habits = () => {
           trackColor={{ false: '#767577', true: '#81b0ff' }}
           thumbColor='#f4f3f4'
           onValueChange={() => {
-            console.log("1");
             setForm({...form, dailyRepeat: !form.dailyRepeat});
             if(form.weeklyRepeat){
               setForm({...form, weeklyRepeat:false, dailyRepeat: true})
@@ -224,7 +224,6 @@ const habits = () => {
           trackColor={{ false: '#767577', true: '#81b0ff' }}
           thumbColor='#f4f3f4'
           onValueChange={() => {
-            console.log("2");
             setForm({...form, weeklyRepeat: !form.weeklyRepeat});
             if(form.dailyRepeat){
               setForm({...form, dailyRepeat: false, weeklyRepeat:true})
@@ -400,8 +399,8 @@ const habits = () => {
              /> 
               </View>) : 
               (
-                <View>
-                  <Text className='text-3xl text-blue-400 font-pregular'>{item.task}</Text>
+                <View className="border-2 border-dotted rounded-lg p-4 mt-3" style={{borderColor:item.color}}>
+                  <Text className="text-center text-base" style={{color:item.color}}>{item.task}</Text>
                 </View>
               )
             }

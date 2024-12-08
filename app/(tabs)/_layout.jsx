@@ -4,6 +4,7 @@ import {Tabs } from 'expo-router'
 import Feather from '@expo/vector-icons/Feather';
 import Entypo from '@expo/vector-icons/Entypo';
 import FontAwesome5 from '@expo/vector-icons/FontAwesome5';
+import FontAwesome6 from '@expo/vector-icons/FontAwesome6';
 import { StatusBar } from 'expo-status-bar';
 const TabIcon = ({color,name,focused}) =>{
   return (
@@ -14,8 +15,8 @@ const TabIcon = ({color,name,focused}) =>{
             )
           }
           {
-            name === "Settings" && (
-              <Feather name="settings" size={26} color={color}  />
+            name === "Shop" && (
+              <FontAwesome6 name="shop" size={26} color={color} />
             )
           }
           {
@@ -94,14 +95,14 @@ const _layout = () => {
       }}
     />
     <Tabs.Screen
-      name='settings'
+      name='shop'
       options={{
-          title : 'Settings',
+          title : 'Shop',
           headerShown : false,
           tabBarIcon: ({color,focused}) => (
             <TabIcon
                 color = {color}
-                name = "Settings"
+                name = "Shop"
                 focused = {focused}
             />
         )
