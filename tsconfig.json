@@ -13,6 +13,7 @@
     ".expo/types/**/*.ts",
     "./app/**/*.jsx",
     "components/**/*.jsx",
-    "nativewind-env.d.ts"
+    "nativewind-env.d.ts",
+    "constants/rank.js"
   ]
 }

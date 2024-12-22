@@ -3,6 +3,7 @@ module.exports = {
   content: ["./app/**/*.{js,jsx,ts,tsx}",
     "./components/**/*.{js,jsx,ts,tsx}",
   ],
+  safelist: ['text-green-400', 'text-lime-400', 'text-blue-400','text-blue-600','text-violet-400'],
   presets: [require("nativewind/preset")],
   theme: {
     extend: {

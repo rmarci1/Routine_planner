@@ -5,7 +5,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 
 import { useGlobalContext } from "@/context/GlobalProvider";
 import {updateAnythinginProfile, updateStats} from "@/lib/appwrite";
-import { getIcon } from "@/context/icon";
+import { getIcon } from "@/constants/icon";
 import Progressbar from "@/components/Progressbar";
 import EmptyState from "@/components/EmptyState";
 import TextFade from "@/components/TextFade";
@@ -18,6 +18,7 @@ import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 import FontAwesome5 from '@expo/vector-icons/FontAwesome5';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import Ionicons from '@expo/vector-icons/Ionicons';
+import { getRank } from "@/constants/rank";
 
 const SwipeableList = () => {
 
@@ -30,6 +31,7 @@ const SwipeableList = () => {
   const [fadeText, setFadeText] = useState(false);
   const [updateStatusBar, setUpdateStatusBar] = useState(false);
 
+  const [rank,setRank] = useState(getRank(profile.level));
   const [isSwiping, setIsSwiping] = useState(false);
   const [indexlist, setindexList] = useState([]);
   const [limit,setLimit] = useState(0);
@@ -140,8 +142,8 @@ const SwipeableList = () => {
       pointerEvents={isSwiping ? 'none' : 'auto'}  
       ListHeaderComponent={
         <View>
-          <View className='my-6 px-4 space-y-6'>
-              <View className='justify-between item-center flex-row mb-5'>
+          <View className='mt-2 px-4 space-y-6'>
+              <View className='justify-between item-center flex-row'>
                 <View className='flex-col'>
                   <Text className='text-gray-100 text-lg font-medium'>
                     Welcome Back
@@ -153,6 +155,9 @@ const SwipeableList = () => {
                 <View className='flex-row items-center space-x-2'>
                     <Feather name="settings" size={28} color="white"  />
                 </View>
+              </View>
+              <View className="mb-2">
+                <Text className={`${rank[1]} text-2xl`}>{rank[0]}</Text>
               </View>
               {/*<View className="p-4">
                 <View className="flex-row justify-between items-center mb-4">

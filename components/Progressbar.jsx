@@ -1,9 +1,8 @@
 import React, { useEffect, useRef, useMemo } from 'react';
-import { View, Text, Animated, Easing } from 'react-native';
+import { View, Text, Animated, Easing, TouchableOpacity } from 'react-native';
 import { FontAwesome6, AntDesign } from '@expo/vector-icons';
 
-const Progressbar = ({ title, level, color, current,change, max, text, styleText, styleContainer }) => {
-
+const Progressbar = ({ title, level, color, current,change, max, text, styleText, styleContainer,profile,handleclick,stat,spentPoints }) => {
   const animatedValue = useRef(new Animated.Value(0)).current;
   if(change){
     useEffect(() => {
@@ -68,6 +67,27 @@ const Progressbar = ({ title, level, color, current,change, max, text, styleText
         <Text className="absolute left-4 text-white font-pbold text-xl">
           {title} {level}
         </Text>
+        {
+          profile && (
+            <View className='absolute right-3 flex-row items-center'>
+              {spentPoints > 0 && <Text className='text-xl font-pbold text-secondary-200 mr-2'>+{spentPoints}</Text>}
+              {spentPoints != 0 &&  <TouchableOpacity
+                onPress={() => handleclick("minus",stat)}
+                className='border border-white bg-white mr-2 rounded-lg'
+              >
+                <AntDesign name="minus" size={20} color="black" className=''/>
+              </TouchableOpacity>}
+
+              <TouchableOpacity
+                onPress={() => (handleclick("plus",stat))}
+                className='border border-white bg-white mr-2 rounded-lg'
+              >
+                 <AntDesign name="plus" size={20} color="black" className=''/>
+              </TouchableOpacity>
+              
+            </View>
+          )
+        }
        
       </View>
     </View>

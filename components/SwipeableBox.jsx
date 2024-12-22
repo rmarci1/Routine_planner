@@ -14,7 +14,7 @@ import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 import FontAwesome5 from '@expo/vector-icons/FontAwesome5';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import Ionicons from '@expo/vector-icons/Ionicons';
-import { getIcon } from "@/context/icon";
+import { getIcon } from "@/constants/icon";
 
 const SwipeableBox = ({item,index}) => {
     const { user, profile, setProfile,tasks,setTasks} = useGlobalContext();

@@ -46,18 +46,23 @@ const GlobalProvider = ({children}) =>{
                 
                 getTasks(res)
                 .then( async (task) => {
-                    task.forEach(element => {
-                        all_tasks.push(element.task);
-                        if(!element.done){
-                            remaining_tasks.push(element);
-                        }
-                    });
-                    let new_profile = await createAlltasks(res,all_tasks);
-                    setProfile(new_profile);
+                    if(task){
+                        task.forEach(element => {
+                            all_tasks.push(element.task);
+                            if(!element.done){
+                                remaining_tasks.push(element);
+                            }
+                        });
+                        let new_profile = await createAlltasks(res,all_tasks);
+                        setProfile(new_profile);
+                        setTasks(remaining_tasks);
+                        setIsTasksIn(true)
+                    }
+                    else{
+                        setIsTasksIn(false);
+                        setTasks(null);
+                    }
                 });
-                setTasks(remaining_tasks);
-                setIsTasksIn(true)
-
                 getAccessories(res)
                 .then((result) => {
                     if(result){
@@ -73,8 +78,6 @@ const GlobalProvider = ({children}) =>{
             else{
                 setProfile(null);
                 setIsProfileIn(false);
-                setTasks(null);
-                setIsTasksIn(false);
             }   
         })
         .catch((error) => {
