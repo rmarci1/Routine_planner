@@ -1,22 +1,31 @@
 import { View, Text, ScrollView, Alert} from 'react-native'
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import "../../global.css"
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { Link, router } from 'expo-router'
 import FormField from '@/components/FormField'
 import CustomButton from '@/components/CustomButton'
 import CheckBox from 'expo-checkbox'
-import { signIn,getCurrentUser,updateUser, getCurrentProfile, getTasks, createAlltasks } from '@/lib/appwrite'
+import { signIn,getCurrentUser,updateUser, getCurrentProfile, getTasks, createAlltasks, getAccessories } from '@/lib/appwrite'
 import { useGlobalContext } from '@/context/GlobalProvider'
 const Signin = () => {
-  const {setUser, setIsLoggedIn,setProfile,setIsProfileIn, setTasks} = useGlobalContext()
+  const {setUser,setProfile,setTasks,setAccessories, setIsAccessoriesIn,setIsProfileIn,setIsLoggedIn,setIsTasksIn} = useGlobalContext()
+  const {isLoggedIn,isProfileIn,isTasksIn,isAccessoriesIn} = useGlobalContext();
+  
   const [form, setForm] = useState({
     email : '',
     password: ''
   })
+
   const [isSubmitting, setisSubmitting] = useState(false);
   const [isChecked, setIsChecked] = useState(false)
-
+  const [initialize,setInitialize] = useState(false);
+  useEffect(() => {
+    if(initialize && isLoggedIn && isProfileIn && isTasksIn && isAccessoriesIn && !isSubmitting){
+      router.replace('/(tabs)/home');
+    }
+    setInitialize(true);
+  },[isLoggedIn,isProfileIn,isTasksIn,isAccessoriesIn,isSubmitting])
   const submit = async () => {
     if(!form.email || !form.password){
       Alert.alert('Error', 'Please fill in all the fields')
@@ -33,22 +42,41 @@ const Signin = () => {
       const profile = await getCurrentProfile();
       
       getTasks(profile).then( async (task) => {
-        let all_tasks = [];
-        let remaining_tasks = [];
+        if(task){
+          let all_tasks = [];
+          let remaining_tasks = [];
                 
-        task.forEach(element => {
+          task.forEach(element => {
             all_tasks.push(element.task);
             if(!element.done){
                 remaining_tasks.push(element);
             }
-        });
-        let new_profile = await createAlltasks(profile,all_tasks);
-        setProfile(new_profile);
-        setTasks(remaining_tasks);
+          });
+          let new_profile = await createAlltasks(profile,all_tasks);
+          setProfile(new_profile);
+          setTasks(remaining_tasks);
+          setIsProfileIn(true);
+          setIsTasksIn(true);
+        }
+        else{
+          setTasks(null);
+          setIsTasksIn(false);
+          setProfile(null);
+          setIsProfileIn(false);
+        }
       });
-      setIsProfileIn(true);
-      router.replace('/(tabs)/home');
 
+      getAccessories(profile)
+      .then((result) => {
+      if(result){
+         setAccessories(result);
+         setIsAccessoriesIn(true);
+      }
+      else{
+        setAccessories(null);
+        setIsAccessoriesIn(false);
+      }
+      });
     }
     catch(error)
     { 

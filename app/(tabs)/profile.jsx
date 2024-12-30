@@ -1,29 +1,60 @@
-import { View, Text, TouchableOpacity } from 'react-native'
-import React, { useState } from 'react'
+import { View, Text, TouchableOpacity, FlatList } from 'react-native'
+import * as Animatable from 'react-native-animatable'
+import React, { useEffect, useState } from 'react'
 import { useGlobalContext } from '@/context/GlobalProvider'
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Progressbar from '@/components/Progressbar';
 import { getRank } from '@/constants/rank';
 import { updateAnythinginProfile } from '@/lib/appwrite';
-import CustomButton from '@/components/CustomButton';
-
+import FontAwesome5 from '@expo/vector-icons/FontAwesome5';
+import { FaBeer } from 'react-icons/fa';
+import { getIcon } from '@/constants/icon';
 const profile = () => {
-  const {user,profile,setProfile} = useGlobalContext();
+  const {user,profile,setProfile,accessories,setAccessories} = useGlobalContext();
   const [form,setForm] = useState({
     strength : 0,
     intelligence : 0,
     agility : 0,
   });
-  
   const [changebar, setChangeBar] = useState({
     strength : 0,
     intelligence : 0,
     agility : 0,
   })
+  const [types,setTypes] = useState({
+    hat : [],
+    chest : [],
+    leggings: [],
+    shoe: [],
+  })
+
   const [change,setChange] = useState(false);
   const [rank,setRank] = useState(getRank(profile.level));
   const [maxLevel,setMaxLevel] = useState(5);
   const [level,setLevel] = useState(0);
+
+  const [show,setShow] = useState(false);
+  const [activeItem, setActiveItem] = useState(null);
+  useEffect(() => {
+    let hat = [{$id:"empty0"}];
+    let chest = [];
+    let leggings = [];
+    let shoe =  [];
+    accessories.forEach(element => {
+      switch(element.type){
+        case "hat" :
+          hat.push(element)
+        case "chest" :
+          chest.push(element)
+        case "leggings" :
+          leggings.push(element)
+        case "shoe" :
+          shoe.push(element)
+      }
+    });
+    hat.push({$id: "empty1"});
+    setTypes({hat:hat, chest:chest, leggings:leggings, shoe:shoe})
+  },[])
 
   const statToChange = (stat,change) => {
     if (!(level + change > maxLevel || level + change < 0)){
@@ -50,7 +81,6 @@ const profile = () => {
     }
   }
   const handleClick = (operation, stat) => {
-    console.log(change);
     if(!change){
       setChange(true);
     }
@@ -75,6 +105,55 @@ const profile = () => {
     }
     catch(error){
       throw new Error(error);
+    }
+  }
+  const zoomIn = {
+    0: {
+      scale: 0.9
+    },
+    1: {
+      scale:1.1
+    }
+  }
+  const zoomOut = {
+    0: {
+      scale: 1
+    },
+    1: {
+      scale:0.9
+    }
+  }
+
+  const ArmorItem = ({activeItem,item,index}) => {
+    if(item.$id == "empty0" || item.$id == "empty1"){
+      return <View style={{ width: 100, height: 100, backgroundColor: 'transparent' }} />
+    }
+    return (
+        <Animatable.View
+          className='mr-5'
+          animation={activeItem === item.$id || activeItem === index ? zoomIn : zoomOut}
+          duration={500}
+        >
+           <TouchableOpacity className='justify-center items-center' activeOpacity={0.7}
+            onPress={() => setShow(false)}
+           >  
+              <View className='ml-2'>{getIcon(item.icon,"#FF9001",80)}</View>
+           </TouchableOpacity>
+        </Animatable.View>
+    )
+  }
+  const viewableItemsChanged = ({viewableItems}) => {
+    if(viewableItems.length > 0){
+      console.log(viewableItems[0].index);
+      if(viewableItems[0].index < 1){
+        setActiveItem(1);
+      }
+      else if(viewableItems[0].index >= types.hat.length){
+        setActiveItem(types.hat.length-1);
+      }
+      else{
+        setActiveItem(viewableItems[0].index)
+      }
     }
   }
   return (
@@ -127,7 +206,55 @@ const profile = () => {
           <Text className='font-pregular text-white text-xl'>Spend Points</Text>
         </TouchableOpacity>
       </View>}
-      
+      {show && (
+        <View className='items-center justify-center'>
+          <FlatList
+            data={types.hat}
+            keyExtractor={(item) => item.$id}
+            renderItem={({item,index}) => (
+              <ArmorItem activeItem={activeItem} item={item} index={index}/>
+            )}
+            onViewableItemsChanged={viewableItemsChanged}
+            viewabilityConfig={{
+              itemVisiblePercentThreshold: 98
+            }}
+            contentOffset={{x: 100}}
+            horizontal
+            className='w-[60%]'
+          />
+        </View>
+      )}
+      <View className='mt-6 items-center justify-center'>
+        <View className='border bg-white rounded-xl'>
+            <TouchableOpacity
+              className='w-20 h-20 items-center bg-orange-300 rounded-xl  justify-center'
+              onPress={() => {setActiveItem(types.hat[0]); setShow(true)}}
+            > 
+              <FontAwesome5 name="hat-cowboy" size={40} color="#FF9001" />
+            </TouchableOpacity>
+        </View>
+        <View className='border bg-white rounded-xl mt-3'>
+            <TouchableOpacity
+              className='w-20 h-20 items-center bg-orange-300 rounded-xl  justify-center'
+            >
+               <FontAwesome5 name="tshirt" size={40} color="#FF9001" />
+            </TouchableOpacity>
+        </View>
+        <View className='border bg-white rounded-xl mt-3'>
+            <TouchableOpacity
+              className='w-20 h-20 items-center bg-orange-300 rounded-xl  justify-center'
+            >
+              <FontAwesome5 name="tshirt" size={40} color="#FF9001" />
+            </TouchableOpacity>
+        </View>
+        <View className='border bg-white rounded-xl mt-3'>
+            <TouchableOpacity
+              className='w-20 h-20 items-center bg-orange-300 rounded-xl justify-center'
+            >
+              <FontAwesome5 name="tshirt" size={40} color="#FF9001" />
+            </TouchableOpacity>
+        </View>
+      </View>
     </SafeAreaView>
   )
 }

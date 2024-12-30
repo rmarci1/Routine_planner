@@ -1,4 +1,4 @@
-import { createAlltasks, getAccessories, getCurrentProfile, getCurrentUser, getTasks } from "@/lib/appwrite";
+import { createAlltasks, getAccessories, getCurrentProfile, getCurrentUser, getDefaultAccessories, getTasks } from "@/lib/appwrite";
 import { createContext, useContext, useState, useEffect } from "react";
 
 const GlobalContext = createContext();
@@ -11,10 +11,12 @@ const GlobalProvider = ({children}) =>{
     const [isTasksIn, setIsTasksIn] = useState(false);
     const [isLoading, setIsLoading] = useState(true);
     const [isAccessoriesIn, setIsAccessoriesIn] = useState(false);
+    const [isDefaultAccessoriesIn, setIsDefaultAccessoriesIn] = useState(false);
     const [user, setUser] = useState(null);
     const [profile, setProfile] = useState(null);
     const [tasks, setTasks] = useState(null);
     const [accessories, setAccessories] = useState(null);
+    const [defaultAccessories, setDefaultAccessories] = useState(null);
     useEffect(() => {
         getCurrentUser()
         .then((res) => {
@@ -74,6 +76,17 @@ const GlobalProvider = ({children}) =>{
                         setIsAccessoriesIn(false);
                     }
                 });
+                getDefaultAccessories(res)
+                .then((result) => {
+                    if(result){
+                        setDefaultAccessories(result);
+                        setIsDefaultAccessoriesIn(true);
+                    }
+                    else{
+                        setDefaultAccessories(null);
+                        setIsDefaultAccessoriesIn(false);
+                    }
+                })
             }
             else{
                 setProfile(null);
@@ -107,6 +120,8 @@ const GlobalProvider = ({children}) =>{
                 setAccessories,
                 isAccessoriesIn,
                 setIsAccessoriesIn,
+                defaultAccessories, 
+                setDefaultAccessories,
             }}
         >
             {children}
